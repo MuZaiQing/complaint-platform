@@ -38,9 +38,9 @@ services:
       JAR_DIR: /jars
     volumes:
       # 大数据集（CSV/PKL/mr_result）不进镜像，运行时只读挂载
-      - ./:/data:ro
+      - ./data:/data:ro
       # 集群任务 jar 包，运行/体检时需要本地副本
-      - ./jar包:/jars:ro
+      - ./mr/jar包:/jars:ro
     depends_on:
       mysql:
         condition: service_healthy

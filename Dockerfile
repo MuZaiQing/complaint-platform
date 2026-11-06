@@ -1,6 +1,6 @@
 # 一键部署：前端 index.html + FastAPI 同进程提供服务
 # 构建:  docker compose up -d --build
-# 单独构建: docker build -t complaint-platform . && docker run -p 8000:8000 -v "$PWD:/data:ro" complaint-platform
+# 单独构建: docker build -t complaint-platform . && docker run -p 8000:8000 -v "$PWD/data:/data:ro" complaint-platform
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \

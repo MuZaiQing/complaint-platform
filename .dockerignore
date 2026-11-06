@@ -1,8 +1,11 @@
+data/
+archive/
+dist/
 *.csv
 *.pkl
-CCDB/
 mr_result/
 .screenshots/
 .superpowers/
+.git/
 __pycache__/
 *.log

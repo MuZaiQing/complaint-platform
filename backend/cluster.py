@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent
 JOBS_PATH = BASE_DIR / "cluster_jobs.json"
 HISTORY_PATH = BASE_DIR / "cluster_history.json"
 LOG_DIR = BASE_DIR / ".cluster_logs"
-JAR_LOCAL_DIR = Path(os.getenv("JAR_DIR", r"D:\fqh\jar包"))
+JAR_LOCAL_DIR = Path(os.getenv("JAR_DIR", r"D:\fqh\mr\jar包"))
 JAR_REMOTE_DIR = os.getenv("CLUSTER_JAR_DIR", "/home/hadoop/jars")
 MOCK = os.getenv("CLUSTER_MOCK", "0") == "1"
 

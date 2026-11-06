@@ -25,7 +25,7 @@ import pymysql
 # 数据库与统计表元数据在 db_meta.py 共享（集群控制页也用它做入库白名单）
 from db_meta import DB_CONFIG, STATS_TABLES
 
-DATA_ROOT = os.getenv("DATA_ROOT", r"D:\fqh")
+DATA_ROOT = os.getenv("DATA_ROOT", r"D:\fqh\data")
 
 app = FastAPI(title="多源消费者投诉智能分析与预警平台", version="1.0")
 # 同源部署无需 CORS；分离部署时用 ALLOW_ORIGINS 显式放行（逗号分隔）
@@ -634,7 +634,7 @@ def ensure_dataset(source: str):
         else:
             print("[懒加载] 17 份 CCDB 文本文件 ...")
             dfs = []
-            for fp in sorted(glob.glob(os.path.join(DATA_ROOT, "CCDB_Export_*.csv"))):
+            for fp in sorted(glob.glob(os.path.join(DATA_ROOT, "CCDB", "CCDB_Export_*.csv"))):
                 name = os.path.basename(fp).replace(".csv", "")
                 try:
                     df = pd.read_csv(fp, low_memory=False)

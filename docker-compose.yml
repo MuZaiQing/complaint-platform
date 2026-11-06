@@ -1,0 +1,49 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fqh112233!}
+      MYSQL_DATABASE: ${DB_NAME:-complaint_analysis}
+      TZ: Asia/Shanghai
+    command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD:-Fqh112233!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fqh112233!}
+      DB_NAME: ${DB_NAME:-complaint_analysis}
+      DATA_ROOT: /data
+      ALLOW_ORIGINS: ${ALLOW_ORIGINS:-*}
+      # 集群控制台（SSH）；CLUSTER_ENV 不显式传入时用代码内置默认值
+      CLUSTER_HOST: ${CLUSTER_HOST:-10.15.7.101}
+      CLUSTER_PORT: ${CLUSTER_PORT:-22}
+      CLUSTER_USER: ${CLUSTER_USER:-hadoop}
+      CLUSTER_PASSWORD: ${CLUSTER_PASSWORD:-dsj123}
+      CLUSTER_JAR_DIR: ${CLUSTER_JAR_DIR:-/home/hadoop/jars}
+      CLUSTER_MOCK: ${CLUSTER_MOCK:-0}
+      JAR_DIR: /jars
+    volumes:
+      # 大数据集（CSV/PKL/mr_result）不进镜像，运行时只读挂载
+      - ./:/data:ro
+      # 集群任务 jar 包，运行/体检时需要本地副本
+      - ./jar包:/jars:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

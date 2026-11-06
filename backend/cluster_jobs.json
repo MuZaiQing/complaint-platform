@@ -1,0 +1,53 @@
+{
+  "jobs": [
+    {"id": "company_count", "name": "金融 · 企业投诉量", "jar": "CompanyCount.jar", "main_class": null,
+     "default_input": "/data/cfpb_struct/input/complaints_clean.csv", "default_output": "/data/output/company_count",
+     "target_table": "fin_company", "columns": ["company_name", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按企业聚合 CFPB 投诉"},
+
+    {"id": "product_count", "name": "金融 · 产品投诉量", "jar": "ProductCount.jar", "main_class": null,
+     "default_input": "/data/cfpb_struct/input/complaints_clean.csv", "default_output": "/data/output/product_count",
+     "target_table": "fin_product", "columns": ["product_name", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按产品聚合 CFPB 投诉"},
+
+    {"id": "state_count", "name": "金融 · 州级投诉量", "jar": "state_count.jar", "main_class": null,
+     "default_input": "/data/cfpb_struct/input/complaints_clean.csv", "default_output": "/data/output/state_count",
+     "target_table": "fin_state", "columns": ["state_code", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按州聚合 CFPB 投诉"},
+
+    {"id": "timely_response", "name": "金融 · 及时回复率", "jar": "TimelyResponseCount.jar", "main_class": null,
+     "default_input": "/data/cfpb_struct/input/complaints_clean.csv", "default_output": "/data/output/timely_response",
+     "target_table": "fin_timely_response", "columns": ["response_flag", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按及时回复标记统计"},
+
+    {"id": "product_timely", "name": "金融 · 分产品及时回复", "jar": "ProductTimelyCount.jar", "main_class": null,
+     "default_input": "/data/cfpb_struct/input/complaints_clean.csv", "default_output": "/data/output/product_timely",
+     "target_table": "fin_product_timely", "columns": ["stat_key", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "产品 × 及时回复组合统计"},
+
+    {"id": "word_count", "name": "文本 · 高频词", "jar": "NarrativeWordCount.jar", "main_class": "org.example.Main",
+     "default_input": "/data/cfpb_text/input/", "default_output": "/data/output/word_count",
+     "target_table": "fin_word_freq", "columns": ["word", "freq"], "parser": "tsv",
+     "import_enabled": false, "description": "投诉叙述分词词频"},
+
+    {"id": "word_count2", "name": "文本 · 高频词（第二版）", "jar": "NarrativeWordCount2.jar", "main_class": "org.example.Main",
+     "default_input": "/data/cfpb_text/input/", "default_output": "/data/output/word_count2",
+     "target_table": "fin_word_freq", "columns": ["word", "freq"], "parser": "tsv",
+     "import_enabled": false, "description": "备用分词口径，默认不入库（会覆盖 fin_word_freq）"},
+
+    {"id": "fcc_state", "name": "电信 · 州级投诉量", "jar": "FccStateCount.jar", "main_class": null,
+     "default_input": "/data/fcc/input/fcc_consumer_complaints_clean.csv", "default_output": "/data/output/fcc_state",
+     "target_table": "fcc_state", "columns": ["state_code", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按州聚合 FCC 投诉"},
+
+    {"id": "fcc_monthly", "name": "电信 · 月度投诉量", "jar": "FccMonthlyCount.jar", "main_class": null,
+     "default_input": "/data/fcc/input/fcc_consumer_complaints_clean.csv", "default_output": "/data/output/fcc_monthly",
+     "target_table": "fcc_monthly", "columns": ["stat_month", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按月聚合 FCC 投诉"},
+
+    {"id": "fcc_issue", "name": "电信 · 投诉类型", "jar": "FccIssueCount.jar", "main_class": null,
+     "default_input": "/data/fcc/input/fcc_consumer_complaints_clean.csv", "default_output": "/data/output/fcc_issue",
+     "target_table": "fcc_issue", "columns": ["issue_name", "complaint_count"], "parser": "tsv",
+     "import_enabled": false, "description": "按投诉类型聚合 FCC 投诉"}
+  ]
+}

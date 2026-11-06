@@ -1,0 +1,16 @@
+# 数据与交付物（不进版本库）
+data/
+dist/
+archive/
+CCDB/
+mr_result/
+*.csv
+*.pkl
+.screenshots/
+
+# 敏感与运行产物
+backend/.env
+backend/logs/
+backend/.cluster_logs/
+__pycache__/
+*.log

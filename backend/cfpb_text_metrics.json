@@ -1,0 +1,20 @@
+{
+  "accuracy": 0.8524,
+  "precision": 0.8538,
+  "recall": 0.852,
+  "f1": 0.8525,
+  "sample_count": 178787,
+  "features": "TF-IDF(1-2gram) · 50,000 维",
+  "classes": [
+    "Checking or savings account",
+    "Credit card",
+    "Credit reporting or other personal consumer reports",
+    "Debt collection",
+    "Money transfer, virtual currency, or money service",
+    "Mortgage",
+    "Payday loan, title loan, personal loan, or advance loan",
+    "Student loan",
+    "Vehicle loan or lease"
+  ],
+  "note": "真实训练：CCDB 17 份 Export 流式抽样(每类≤20000)，TF-IDF(5万特征,1-2gram)+LogisticRegression(balanced)，指标为测试集宏平均"
+}

@@ -1,0 +1,30 @@
+{
+  "models": [
+    {
+      "name": "词袋 + 朴素贝叶斯",
+      "accuracy": 0.7748,
+      "f1": 0.7751,
+      "precision": 0.7926,
+      "recall": 0.7743,
+      "train_seconds": 31.3
+    },
+    {
+      "name": "TF-IDF + 朴素贝叶斯",
+      "accuracy": 0.7867,
+      "f1": 0.7855,
+      "precision": 0.8077,
+      "recall": 0.7862,
+      "train_seconds": 72.5
+    },
+    {
+      "name": "TF-IDF + 逻辑回归（当前）",
+      "accuracy": 0.8524,
+      "f1": 0.8525,
+      "precision": 0.8538,
+      "recall": 0.852,
+      "train_seconds": 135.3
+    }
+  ],
+  "sample_count": 178787,
+  "note": "同一抽样数据、同一 8:2 分层切分下的测试集宏平均指标，用于模型选型对照"
+}

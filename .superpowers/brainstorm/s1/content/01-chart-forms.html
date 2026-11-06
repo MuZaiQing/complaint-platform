@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>TOP5 占比图 · 形态备选</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:#0B0C10; color:#9BA1AD; font-family:-apple-system,"Segoe UI","Noto Sans SC",sans-serif;
+         padding:26px 28px 40px; }
+  h2 { color:#EDEDEF; font-size:19px; letter-spacing:.5px; margin-bottom:6px; }
+  .sub { font-size:12.5px; line-height:1.75; color:#6B7280; margin-bottom:18px; max-width:1080px; }
+  .sub b { color:#FF9533; font-weight:600; }
+  .cards { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px; max-width:1080px; }
+  .card { background:#101216; border:1px solid rgba(255,255,255,.08); border-radius:12px;
+          padding:14px 16px 16px; cursor:pointer; transition:.18s; }
+  .card:hover { border-color:rgba(0,216,255,.35); }
+  .card.selected { border-color:#00D8FF; box-shadow:0 0 0 1px #00D8FF, 0 6px 24px rgba(0,216,255,.12); }
+  .cap { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .tag { width:20px; height:20px; border-radius:4px; background:rgba(0,216,255,.12);
+         color:#00D8FF; font:600 11px/20px monospace; text-align:center; }
+  .cap h3 { color:#EDEDEF; font-size:13.5px; font-weight:600; }
+  .cap .note { color:#6B7280; font-size:11px; margin-left:auto; text-align:right; }
+  .box { height:210px; background:#15181D; border:1px solid rgba(255,255,255,.05);
+         border-radius:8px; display:flex; align-items:center; justify-content:center; padding:10px; }
+  .desc { font-size:11.5px; line-height:1.7; color:#6B7280; margin-top:9px; }
+  .desc b { color:#2DD4A7; font-weight:600; }
+  .desc i { color:#F2555A; font-style:normal; }
+  .mono { font-family:"JetBrains Mono",Consolas,monospace; }
+
+  /* A 排名进度条 */
+  .ranks { width:100%; font-size:11.5px; }
+  .row { display:grid; grid-template-columns:16px 66px 1fr 52px; gap:7px; align-items:center;
+         margin-bottom:9px; }
+  .row .idx { color:#4B5159; font:600 10px/1 monospace; }
+  .row .nm { color:#9BA1AD; font-size:11px; }
+  .row .track { display:block; height:7px; background:rgba(255,255,255,.05); border-radius:4px; }
+  .row .fill { display:block; height:7px; border-radius:4px; }
+  .row .vv { color:#9BA1AD; font:11px/1 monospace; text-align:right; }
+  .row.top .nm { color:#EDEDEF; font-weight:600; }
+  .row.top .vv { color:#00D8FF; }
+
+  /* C 华夫格 */
+  .waffle { display:grid; grid-template-columns:repeat(10, 12px); gap:3px; }
+  .cell { width:12px; height:12px; border-radius:2px; }
+  .wlegend { margin-left:16px; font-size:11px; line-height:1.9; }
+  .wlegend span.dot { display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; }
+
+  /* D 环形 + 右侧榜 */
+  .dwrap { display:flex; align-items:center; gap:16px; width:100%; }
+  .donut { position:relative; width:142px; height:142px; flex-shrink:0; }
+  .ring { position:absolute; inset:0; border-radius:50%;
+    background:conic-gradient(
+      #15181D 0deg 0.7deg, #00D8FF 0.7deg 251.7deg,
+      #15181D 251.7deg 253.1deg, #4C8DFF 253.1deg 293.1deg,
+      #15181D 293.1deg 294.5deg, #4C8DFF 294.5deg 316.5deg,
+      #15181D 316.5deg 317.9deg, #2A5A8C 317.9deg 325.5deg,
+      #15181D 325.5deg 326.9deg, #2A5A8C 326.9deg 333.4deg,
+      #15181D 333.4deg 334.8deg, #4B5159 334.8deg 360deg);
+    -webkit-mask:radial-gradient(circle, transparent 0 50px, #000 51px);
+            mask:radial-gradient(circle, transparent 0 50px, #000 51px); }
+  .dcenter { position:absolute; inset:0; display:flex; flex-direction:column;
+             align-items:center; justify-content:center; }
+  .dcenter .v { color:#00D8FF; font:700 19px/1 monospace; }
+  .dcenter .k { color:#6B7280; font-size:10px; margin-top:5px; }
+  .dlist { flex:1; font-size:11px; }
+  .dlist .it { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .dlist .it i { width:7px; height:7px; border-radius:2px; display:block; }
+  .dlist .it span.n { flex:1; color:#9BA1AD; }
+  .dlist .it span.p { color:#4B5159; font-family:monospace; }
+</style>
+</head>
+<body>
+<h2>TOP5 占比图，4 个替代方向</h2>
+<p class="sub">
+现在这版<b>径向排名条</b>的问题：为了画 6 条弧，每个分类都铺了一整圈轨道底色，6 圈同心轨道叠在一起像「靶心」，
+噪点比信息多；而且极坐标下 70% 和 11% 的弧长差异要靠读数才能感知。
+<br/>同一份真实数据（金融产品投诉占比：征信 70.1% / 债务催收 11.5% / 储蓄 6.5% / 信用卡 2.5% / 学生贷 2.2% / 其他 7.3%），下面 4 种画法各有取舍。点一张卡片选中，或直接告诉我哪里不对。
+</p>
+
+<div class="cards">
+
+  <!-- A -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="cap"><div class="tag">A</div><h3>排名进度条（榜单式）</h3><div class="note">最易读</div></div>
+    <div class="box">
+      <div class="ranks">
+        <div class="row top"><span class="idx">#1</span><span class="nm">征信·其他</span><span class="track"><span class="fill" style="width:100%;background:linear-gradient(90deg,#00D8FF,#8FE9FF)"></span></span><span class="vv">70.1%</span></div>
+        <div class="row"><span class="idx">#2</span><span class="nm">债务催收</span><span class="track"><span class="fill" style="width:16.4%;background:#4C8DFF"></span></span><span class="vv">11.5%</span></div>
+        <div class="row"><span class="idx">#3</span><span class="nm">储蓄/支票</span><span class="track"><span class="fill" style="width:9.3%;background:#4C8DFF"></span></span><span class="vv">6.5%</span></div>
+        <div class="row"><span class="idx">#4</span><span class="nm">信用卡</span><span class="track"><span class="fill" style="width:3.6%;background:#2A5A8C"></span></span><span class="vv">2.5%</span></div>
+        <div class="row"><span class="idx">#5</span><span class="nm">学生贷款</span><span class="track"><span class="fill" style="width:3.1%;background:#2A5A8C"></span></span><span class="vv">2.2%</span></div>
+        <div class="row"><span class="idx">—</span><span class="nm">其他合并</span><span class="track"><span class="fill" style="width:10.4%;background:#4B5159"></span></span><span class="vv">7.3%</span></div>
+      </div>
+    </div>
+    <div class="desc"><b>优点</b>：排名、占比、数值一眼扫完，零认知成本；适合"谁是主要矛盾"这种结论。<i>代价</i>：偏朴素，不算视觉记忆点。</div>
+  </div>
+
+  <!-- B -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="cap"><div class="tag">B</div><h3>帕累托（柱 + 累计线）</h3><div class="note">最有分析感</div></div>
+    <div class="box">
+      <svg width="272" height="192" viewBox="0 0 272 192">
+        <!-- 80% 参考线 -->
+        <line x1="18" y1="35" x2="258" y2="35" stroke="#F2555A" stroke-width="1" stroke-dasharray="4 4" opacity=".5"/>
+        <text x="22" y="31" fill="#F2555A" font-size="9" font-family="monospace" opacity=".75">80% 集中度</text>
+        <!-- 柱（左轴：投诉量） -->
+        <rect x="18" y="38" width="26" height="104" rx="3" fill="#00D8FF"/>
+        <rect x="54" y="125" width="26" height="17" rx="3" fill="#4C8DFF"/>
+        <rect x="90" y="132" width="26" height="10" rx="3" fill="#4C8DFF"/>
+        <rect x="126" y="138" width="26" height="4" rx="2" fill="#2A5A8C"/>
+        <rect x="162" y="139" width="26" height="3" rx="2" fill="#2A5A8C"/>
+        <rect x="198" y="131" width="26" height="11" rx="3" fill="#4B5159"/>
+        <!-- 累计占比线（右轴 0-100%） -->
+        <polyline points="31,48 67,32 103,24 139,21 175,18 211,8"
+                  fill="none" stroke="#FF9533" stroke-width="1.6"/>
+        <g fill="#FF9533">
+          <circle cx="31" cy="48" r="2.4"/><circle cx="67" cy="32" r="2.2"/>
+          <circle cx="103" cy="24" r="2"/><circle cx="139" cy="21" r="1.9"/>
+          <circle cx="175" cy="18" r="1.9"/><circle cx="211" cy="8" r="2.4"/>
+        </g>
+        <g fill="#FF9533" font-size="8.5" font-family="monospace" text-anchor="middle">
+          <text x="31" y="60">70%</text><text x="67" y="44">82%</text><text x="103" y="37">88%</text>
+          <text x="211" y="21">100%</text>
+        </g>
+        <!-- 轴 -->
+        <line x1="18" y1="142" x2="258" y2="142" stroke="#2A2F38"/>
+        <g fill="#6B7280" font-size="9">
+          <text x="20" y="157">征信</text><text x="56" y="157">债务</text><text x="92" y="157">储蓄</text>
+          <text x="128" y="157">信用</text><text x="164" y="157">学生</text><text x="200" y="157">其他</text>
+        </g>
+        <text x="20" y="176" fill="#4B5159" font-size="9">柱：投诉量　　橙线：累计占比</text>
+      </svg>
+    </div>
+    <div class="desc"><b>优点</b>：直接讲出"前 2 项占 82%"的 80/20 结论，和预警联动很像；<i>代价</i>：需要一眼看懂双轴，小白略吃力。</div>
+  </div>
+
+  <!-- C -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="cap"><div class="tag">C</div><h3>华夫格（100 格 = 100%）</h3><div class="note">最直觉</div></div>
+    <div class="box">
+      <div class="waffle" id="waffle"></div>
+      <div class="wlegend">
+        <div><span class="dot" style="background:#00D8FF"></span>征信 70%</div>
+        <div><span class="dot" style="background:#4C8DFF"></span>债务催收 12%</div>
+        <div><span class="dot" style="background:#7FA8D8"></span>储蓄 6%</div>
+        <div><span class="dot" style="background:#2A5A8C"></span>信用卡 3%</div>
+        <div><span class="dot" style="background:#1F4468"></span>学生贷 2%</div>
+        <div><span class="dot" style="background:#4B5159"></span>其他 7%</div>
+      </div>
+    </div>
+    <div class="desc"><b>优点</b>：一格 1%，占比变成"能不能一眼数出来"，全站最容易懂；<i>代价</i>：不适合 10+ 分类，细分类会碎。</div>
+  </div>
+
+  <!-- D -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="cap"><div class="tag">D</div><h3>细环 + 右侧榜单</h3><div class="note">最精致</div></div>
+    <div class="box">
+      <div class="dwrap">
+        <div class="donut">
+          <div class="ring"></div>
+          <div class="dcenter"><span class="v">18.85M</span><span class="k">金融投诉总数</span></div>
+        </div>
+        <div class="dlist">
+          <div class="it"><i style="background:#00D8FF"></i><span class="n">征信·其他</span><span class="p">70.1%</span></div>
+          <div class="it"><i style="background:#4C8DFF"></i><span class="n">债务催收</span><span class="p">11.5%</span></div>
+          <div class="it"><i style="background:#7FA8D8"></i><span class="n">储蓄/支票</span><span class="p">6.5%</span></div>
+          <div class="it"><i style="background:#2A5A8C"></i><span class="n">信用卡</span><span class="p">2.5%</span></div>
+          <div class="it"><i style="background:#1F4468"></i><span class="n">学生贷款</span><span class="p">2.2%</span></div>
+          <div class="it"><i style="background:#4B5159"></i><span class="n">其他合并</span><span class="p">7.3%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="desc"><b>优点</b>：保留环形 + 中心总数的熟悉感，但去掉图例挤占、把名字和占比变成右侧可扫的榜单；<i>代价</i>：仍是"饼"，占比感知弱于 A。</div>
+  </div>
+
+</div>
+
+<script>
+  const seq = [['#00D8FF',70],['#4C8DFF',12],['#7FA8D8',6],['#2A5A8C',3],['#1F4468',2],['#4B5159',7]];
+  const w = document.getElementById('waffle');
+  let html = '';
+  seq.forEach(([c, n]) => { for (let i=0;i<n;i++) html += '<span class="cell" style="background:'+c+'"></span>'; });
+  w.innerHTML = html;
+</script>
+</body>
+</html>

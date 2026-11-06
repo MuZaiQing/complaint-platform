@@ -1,0 +1,285 @@
+[
+ {
+  "run_id": "736e57b803ed",
+  "id": "timely_response",
+  "name": "金融 · 及时回复率",
+  "state": "success",
+  "started": "2026-11-06T20:25:17",
+  "ended": "2026-11-06T20:30:44",
+  "import_state": "off",
+  "rows_imported": 0
+ },
+ {
+  "run_id": "c09c09c76d5b",
+  "id": "state_count",
+  "name": "金融 · 州级投诉量",
+  "state": "failed",
+  "phase": "uploading",
+  "started": "2026-11-06T21:30:30",
+  "ended": "2026-11-06T21:30:36",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {},
+  "output": "/data/output/state_count"
+ },
+ {
+  "run_id": "4ad4196d6c42",
+  "id": "state_count",
+  "name": "金融 · 州级投诉量",
+  "state": "failed",
+  "phase": "failed",
+  "started": "2026-11-06T21:32:10",
+  "ended": "2026-11-06T21:32:16",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.StateCount",
+   "main_class_source": "manifest",
+   "input_check": "missing",
+   "output_existed": null,
+   "layout": null,
+   "schema": null,
+   "checked_at": null
+  },
+  "output": "/data/output/state_count"
+ },
+ {
+  "run_id": "971f35967ebd",
+  "id": "timely_response",
+  "name": "金融 · 及时回复率",
+  "state": "failed",
+  "phase": "failed",
+  "started": "2026-11-06T21:32:43",
+  "ended": "2026-11-06T21:32:54",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.TimelyResponseCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:32:48"
+  },
+  "output": "/data/output/timely_response_accept"
+ },
+ {
+  "run_id": "3bf1fec99c4b",
+  "id": "timely_response",
+  "name": "金融 · 及时回复率",
+  "state": "success",
+  "phase": "finalizing",
+  "started": "2026-11-06T21:35:38",
+  "ended": "2026-11-06T21:41:50",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.TimelyResponseCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": {
+    "sep": "tsv",
+    "ncols": 2,
+    "mismatch": false,
+    "sample": [
+     "No\t112962",
+     "Yes\t18736296"
+    ]
+   },
+   "schema": null,
+   "checked_at": "2026-11-06T21:35:46"
+  },
+  "output": "/data/output/timely_response_accept"
+ },
+ {
+  "run_id": "ac6b46cb7f70",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:47:31",
+  "ended": "2026-11-06T21:47:42",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:47:35"
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "ac6b46cb7f70",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "failed",
+  "phase": "failed",
+  "started": "2026-11-06T21:47:31",
+  "ended": "2026-11-06T21:47:45",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:47:35"
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "3539f10e3b5d",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:47:59",
+  "ended": "2026-11-06T21:48:10",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:48:04"
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "3539f10e3b5d",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "failed",
+  "phase": "failed",
+  "started": "2026-11-06T21:47:59",
+  "ended": "2026-11-06T21:48:12",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:48:04"
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "4b8502b8b6ae",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:49:43",
+  "ended": "2026-11-06T21:49:54",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:49:57"
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "a0205258e871",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:50:20",
+  "ended": "2026-11-06T21:50:30",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": true,
+   "layout": null,
+   "schema": null,
+   "checked_at": null
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "a0205258e871",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "failed",
+  "phase": "failed",
+  "started": "2026-11-06T21:50:20",
+  "ended": "2026-11-06T21:50:35",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": true,
+   "layout": null,
+   "schema": null,
+   "checked_at": null
+  },
+  "output": "/data/output/fcc_state_killtest"
+ },
+ {
+  "run_id": "a7f1b73243a5",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:52:42",
+  "ended": "2026-11-06T21:52:54",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:52:49"
+  },
+  "output": "/data/output/fcc_state_killtest2"
+ },
+ {
+  "run_id": "79f45119403d",
+  "id": "fcc_state",
+  "name": "电信 · 州级投诉量",
+  "state": "killed",
+  "phase": "killed",
+  "started": "2026-11-06T21:53:07",
+  "ended": "2026-11-06T21:53:18",
+  "import_state": "off",
+  "rows_imported": 0,
+  "probe": {
+   "main_class": "org.example.FccStateCount",
+   "main_class_source": "manifest",
+   "input_check": "ok",
+   "output_existed": false,
+   "layout": null,
+   "schema": null,
+   "checked_at": "2026-11-06T21:53:13"
+  },
+  "output": "/data/output/fcc_state_killtest2"
+ }
+]

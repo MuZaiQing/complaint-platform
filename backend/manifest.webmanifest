@@ -1,0 +1,27 @@
+{
+  "name": "多源消费者投诉智能分析与预警平台",
+  "short_name": "投诉预警",
+  "description": "多源消费者投诉智能分析与预警平台：金融与电信投诉数据分析、AI 文本挖掘与实时预警。",
+  "start_url": "/?page=dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B0C10",
+  "theme_color": "#0B0C10",
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

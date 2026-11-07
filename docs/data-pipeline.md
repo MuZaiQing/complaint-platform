@@ -10,7 +10,7 @@ CFPB 官网 archive.html                     FCC 公开投诉数据
 17 份 Export zip → 解压 CSV（未清洗）              │
         │                                          │
         ▼                                          ▼
-data/CCDB/（17 份 CCDB_Export_*.csv）       fcc_consumer_complaints.csv（未清洗）
+未清洗前的源数据/CCDB/（17 份 CCDB_Export_*.csv）       fcc_consumer_complaints.csv（未清洗）
 complaints.csv（未清洗，未随项目保存）             │
         │                                          │
         │  数据清洗源码/explore*.py（只读探查，改造前摸底）
@@ -78,14 +78,14 @@ HDFS /data/cfpb_text/input/                        │
 
 | 文件 | 位置 | 内容 |
 |---|---|---|
-| 17 份原始导出 | `data/CCDB/CCDB_Export_*.csv` | CFPB 投诉原始记录（含 narrative 原文） |
+| 17 份原始导出 | `未清洗前的源数据/CCDB/CCDB_Export_*.csv` | CFPB 投诉原始记录（含 narrative 原文），约 6.5GB |
 | 结构化清洗集 | `data/complaints_clean.csv` / `.pkl` | CSV 供 MR 读取，pkl 为 category 优化版供后端懒加载 |
 | 原文文本集 | `data/ccdb_text.pkl` | 17 份合并后的投诉叙述文本（约 200 万行量级） |
 | 电信清洗集 | `data/fcc_consumer_complaints_clean.csv` / `.pkl` | FCC 工单清洗结果（Issue 字段为分类依据） |
 
 `未清洗前的源数据/` 是输入端目录，记录了原始文件的落点与重跑方式（见该目录 README）。
 
-pkl 优先、CSV 兜底：后端 `ensure_dataset()`（[main.py:611](file:///d:/fqh/backend/main.py#L611-L658)）先找同名 pkl，缺失时回退读 CSV 或逐份拼 `CCDB/`。
+pkl 优先、CSV 兜底：后端 `ensure_dataset()`（[main.py:611](file:///d:/fqh/backend/main.py#L611-L658)）先找 `data/` 下的同名 pkl，缺失时回退读同名 CSV；连 `ccdb_text.pkl` 也缺失时，才按 `RAW_DATA_ROOT/CCDB/` 逐份合并原始 CSV。
 
 ## 四、MapReduce 统计
 
@@ -123,7 +123,7 @@ pkl 优先、CSV 兜底：后端 `ensure_dataset()`（[main.py:611](file:///d:/f
 ## 六、复现顺序
 
 1. 采集：跑 `pipeline/collect_narratives.py`，得到 17 份 zip 与 manifest
-2. 解压：zip 内 CSV 放入 `data/CCDB/`
+2. 解压：zip 内 CSV 放入 `未清洗前的源数据/CCDB/`
 3. 探查：`数据清洗源码/explore.py`、`explore_other.py`，确认字段与空值情况
 4. 清洗：`数据清洗源码/clean.py`、`clean_complaints.py`、`clean_fcc.py`，核对输出行数
 5. 上传：三个输入路径推到 HDFS（`/data/cfpb_struct/input/`、`/data/cfpb_text/input/`、`/data/fcc/input/`）

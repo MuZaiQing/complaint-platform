@@ -3,6 +3,7 @@ data/
 dist/
 archive/
 CCDB/
+未清洗前的源数据/CCDB/
 mr_result/
 *.csv
 *.pkl

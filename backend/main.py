@@ -26,6 +26,8 @@ import pymysql
 from db_meta import DB_CONFIG, STATS_TABLES
 
 DATA_ROOT = os.getenv("DATA_ROOT", r"D:\fqh\data")
+# 未清洗原始数据（仅 pkl 缺失时兜底合并，不参与日常统计）
+RAW_DATA_ROOT = os.getenv("RAW_DATA_ROOT", r"D:\fqh\未清洗前的源数据")
 
 app = FastAPI(title="多源消费者投诉智能分析与预警平台", version="1.0")
 # 同源部署无需 CORS；分离部署时用 ALLOW_ORIGINS 显式放行（逗号分隔）
@@ -634,7 +636,7 @@ def ensure_dataset(source: str):
         else:
             print("[懒加载] 17 份 CCDB 文本文件 ...")
             dfs = []
-            for fp in sorted(glob.glob(os.path.join(DATA_ROOT, "CCDB", "CCDB_Export_*.csv"))):
+            for fp in sorted(glob.glob(os.path.join(RAW_DATA_ROOT, "CCDB", "CCDB_Export_*.csv"))):
                 name = os.path.basename(fp).replace(".csv", "")
                 try:
                     df = pd.read_csv(fp, low_memory=False)

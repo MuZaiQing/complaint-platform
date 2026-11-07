@@ -27,6 +27,8 @@ services:
       DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-Fqh112233!}
       DB_NAME: ${DB_NAME:-complaint_analysis}
       DATA_ROOT: /data
+      # 未清洗原始数据（pkl 缺失时兜底合并 17 份 CCDB）
+      RAW_DATA_ROOT: /raw
       ALLOW_ORIGINS: ${ALLOW_ORIGINS:-*}
       # 集群控制台（SSH）；CLUSTER_ENV 不显式传入时用代码内置默认值
       CLUSTER_HOST: ${CLUSTER_HOST:-10.15.7.101}
@@ -39,6 +41,8 @@ services:
     volumes:
       # 大数据集（CSV/PKL/mr_result）不进镜像，运行时只读挂载
       - ./data:/data:ro
+      # 未清洗原始 CCDB（仅兜底合并用，日常不读取）
+      - ./未清洗前的源数据:/raw:ro
       # 集群任务 jar 包，运行/体检时需要本地副本
       - ./mr/jar包:/jars:ro
     depends_on:

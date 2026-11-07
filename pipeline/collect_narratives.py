@@ -3,7 +3,7 @@
 
 来源：https://www.consumerfinance.gov/foia-requests/foia-electronic-reading-room/cfpb-consumer-complaint-database-narratives-archive/
 产物：E:\\选拔赛\\data\\narratives\\*.zip + download_manifest.json
-下游：解压出的 CSV 即项目 data/CCDB/CCDB_Export_*.csv（17 份，Export_5 ~ Export_21）
+下游：解压出的 CSV 即项目 未清洗前的源数据/CCDB/CCDB_Export_*.csv（17 份，Export_5 ~ Export_21）
 
 运行环境：Windows（依赖 curl.exe）；需先将 archive.html 存到工作目录的 work/ 下。
 

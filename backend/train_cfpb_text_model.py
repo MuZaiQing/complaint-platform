@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # CFPB 投诉文本分类模型训练脚本
-# 数据：D:\fqh\data\CCDB 下 17 份 CCDB Export 原始 CSV
+# 数据：D:\fqh\未清洗前的源数据\CCDB 下 17 份 CCDB Export 原始 CSV
 #   特征 X = Consumer complaint narrative（投诉原文），标签 y = Product（CFPB 官方产品分类）
 # 流程：逐文件分块流式读取 → per-class 蓄水池抽样(每类≤2万，内存恒定) → TF-IDF(1~2gram, 5万特征)
 #       + LogisticRegression(class_weight=balanced) → 8:2 分层评估
@@ -15,7 +15,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 
-DATA_DIR = r'D:\fqh\data\CCDB'
+DATA_DIR = r'D:\fqh\未清洗前的源数据\CCDB'
 OUT_DIR  = os.path.dirname(os.path.abspath(__file__))
 TOP_N        = 9        # 样本量 TOP9 的 Product 类（与前端人工校正下拉框一致）
 PER_CLASS    = 20000    # 每类蓄水池抽样上限

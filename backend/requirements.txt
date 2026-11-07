@@ -2,6 +2,8 @@ fastapi>=0.110,<1.0
 uvicorn[standard]>=0.29,<1.0
 pandas>=2.2,<3.0
 pymysql>=1.1,<2.0
+# MySQL 8 默认 caching_sha2_password 认证，pymysql 需要它做 RSA 加密握手
+cryptography>=42,<46
 numpy>=1.26,<3.0
 scikit-learn>=1.5,<2.0
 joblib>=1.4,<2.0

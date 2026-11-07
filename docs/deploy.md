@@ -15,7 +15,7 @@
 | 未清洗原始数据（可选） | `未清洗前的源数据/CCDB/` | 6.5GB，只在 pkl 缺失时兜底 |
 | 集群 jar 与源码 | `mr/jar包/`、`mr/src/` | 集群控制台运行任务时用 |
 | 前端依赖 | `backend/vendor/` | Vue 3.5.13 / Element Plus 2.9.1 / ECharts 5.6 / three.js / 字体 / 美国州界 GeoJSON，全部本地托管 |
-| 启停 / 入库脚本 | `scripts/` | `start/stop`、`export_db/import_db`，Windows 与 Linux 各一套 |
+| 启停 / 入库 / MySQL 安装脚本 | `scripts/` | `start/stop`、`export_db/import_db`、`install_mysql`，Windows 与 Linux 各一套 |
 
 最小部署集约 **3GB**（代码 + SQL + 3 个 pkl + mr_result）。
 
@@ -81,22 +81,27 @@ curl -s http://127.0.0.1:8000/api/dashboard/overview | head -c 200
 ## 三、方式 B：Linux 裸机
 
 ```bash
-# 1. 依赖
-sudo apt install -y python3 python3-pip mysql-server
+# 1. Python 依赖
+sudo apt install -y python3 python3-pip
 python3 -m venv /opt/fqh/.venv
 /opt/fqh/.venv/bin/pip install -r /opt/fqh/backend/requirements.txt
 
-# 2. 配置（DB 与集群地址）
+# 2. 安装 MySQL 8（自动装包、启动、设 root 密码、建库；--password/--db 可省略）
+sudo bash /opt/fqh/scripts/install_mysql.sh --password 'Fqh112233!' --db complaint_analysis
+
+# 3. 配置（DB 与集群地址，DB_PASSWORD 与上一步保持一致）
 cp /opt/fqh/backend/.env.example /opt/fqh/backend/.env
 vi /opt/fqh/backend/.env
 
-# 3. 一键入库（--file 可省略，自动找 db/*.sql）
+# 4. 一键入库（--file 可省略，自动找 db/*.sql）
 cd /opt/fqh && bash scripts/import_db.sh
 
-# 4. 启停
+# 5. 启停
 PYTHON=/opt/fqh/.venv/bin/python bash scripts/start.sh
 bash scripts/stop.sh
 ```
+
+`install_mysql.sh` 的行为：检测 `mysql` 客户端 → 已存在则跳过安装；否则按 `apt-get`/`dnf`/`yum` 安装 `mysql-server` → `systemctl`（或 `service`）启动并设开机自启 → 轮询 `mysqladmin ping` → 优先 socket 免密登录，失败再用目标密码 → `ALTER USER` 切换为 `caching_sha2_password` 并 `CREATE DATABASE ... utf8mb4` → 用新密码验证。默认密码 `Fqh112233!`，默认库 `complaint_analysis`。
 
 开机自启（可选）：
 
@@ -125,11 +130,16 @@ git clone https://github.com/MuZaiQing/complaint-platform.git D:\fqh
 cd D:\fqh
 py -3 -m pip install -r backend\requirements.txt
 
+# 安装 MySQL 8（需以管理员身份运行；参数依次为 密码、库名，可省略）
+.\scripts\install_mysql.bat "Fqh112233!" complaint_analysis
+
 copy backend\.env.example backend\.env   # 改 DB_PASSWORD / CLUSTER_HOST
 .\scripts\import_db.bat                  # 自动查找 db\*.sql
 .\scripts\start.bat
 .\scripts\stop.bat
 ```
+
+`install_mysql.bat` 的行为：校验管理员权限 → 定位 `mysql.exe`（PATH 或 `C:\Program Files\MySQL\MySQL Server 8.0/8.4/8.1\bin`）与 MySQL80/84/81 服务 → 未安装时调用 `winget install Oracle.MySQL` 并轮询等待注册 → 启动服务 → 先试空密码，失败则提示输入现有 root 密码 → 写临时 SQL 执行 `ALTER USER` + `CREATE DATABASE` → 用新密码验证。无 winget 时会提示手动安装 MySQL 8.0 后重跑本脚本。
 
 `start.bat` 会写 `backend\logs\app.pid` 与 `app.log`；`stop.bat` 先按 PID 停，再按 8000 端口兜底。
 

@@ -9,7 +9,9 @@ mr_result/
 .screenshots/
 
 # 敏感与运行产物
-backend/.env
+.env
+.env.*
+!.env.example
 backend/logs/
 backend/.cluster_logs/
 __pycache__/

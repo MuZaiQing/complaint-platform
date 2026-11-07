@@ -9,6 +9,8 @@ services:
     command: ["mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
     volumes:
       - mysql_data:/var/lib/mysql
+      # 首次启动（数据卷为空）时自动建表并导入基础数据，实现一键入库
+      - ./db/complaint_analysis.sql:/docker-entrypoint-initdb.d/01-complaint_analysis.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-p${MYSQL_ROOT_PASSWORD:-Fqh112233!}"]
       interval: 10s

@@ -2,10 +2,11 @@
 """投诉分析平台数据库一键入库（Windows/Linux 通用，Python 3.8+ 标准库）。
 
 用法:
-  python import_db.py [--file dist/db/complaint_analysis_20261107.sql]
+  python import_db.py [--file db/complaint_analysis.sql]
                       [--host 127.0.0.1] [--port 3306] [--user root]
                       [--password xxx] [--db complaint_analysis]
 缺省值依次取: 命令行 > 环境变量(DB_HOST 等) > 内置默认。
+未指定 --file 时依次查找 db/*.sql、dist/db/*.sql（取最新）。
 """
 import argparse
 import os
@@ -45,10 +46,14 @@ def main() -> None:
     if a.file:
         sql = Path(a.file)
     else:
-        files = sorted((root / "dist" / "db").glob("*.sql"), key=os.path.getmtime)
-        if not files:
-            sys.exit("[失败] dist/db 下没有 .sql 文件")
-        sql = files[-1]
+        sql = None
+        for d in (root / "db", root / "dist" / "db"):
+            files = sorted(d.glob("*.sql"), key=os.path.getmtime)
+            if files:
+                sql = files[-1]
+                break
+        if sql is None:
+            sys.exit("[失败] 未找到 .sql（已查找 db/ 与 dist/db/）")
     if not sql.exists():
         sys.exit(f"[失败] 文件不存在: {sql}")
 

@@ -11,15 +11,12 @@
 <link rel="icon" type="image/svg+xml" href="/icon.svg" />
 <title>多源消费者投诉智能分析与预警平台</title>
 
-<!-- 国内 CDN（npmmirror，比 jsdelivr 快数倍） -->
-<link rel="preconnect" href="https://registry.npmmirror.com" crossorigin>
-<link rel="dns-prefetch" href="https://registry.npmmirror.com">
-
+<!-- 前端依赖全部本地托管（backend/vendor/），内网/外网均可离线运行 -->
 <!-- Element Plus 样式 -->
-<link rel="stylesheet" href="https://registry.npmmirror.com/element-plus/2.9.1/files/dist/index.css" />
+<link rel="stylesheet" href="/vendor/element-plus.css" />
 <!-- ECharts 预加载（脚本移到 body 末尾，不阻塞首屏渲染） -->
-<link rel="preload" as="script" href="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js">
-<link rel="preload" as="script" href="https://registry.npmmirror.com/echarts-wordcloud/2.1.0/files/dist/echarts-wordcloud.min.js">
+<link rel="preload" as="script" href="/vendor/echarts.min.js">
+<link rel="preload" as="script" href="/vendor/echarts-wordcloud.min.js">
 
 <!-- 字体：本地托管（Orbitron 数字/标题 + JetBrains Mono 等宽，共 ~34KB，不联网拉取） -->
 <link rel="preload" as="font" type="font/woff2" href="/fonts/orbitron-latin-700-normal.woff2" crossorigin>
@@ -2501,11 +2498,11 @@
 </div>
 
 <!-- 图表库（随 body 末尾加载，不阻塞首屏 HTML/骨架渲染） -->
-<script src="https://registry.npmmirror.com/echarts/5.6.0/files/dist/echarts.min.js"></script>
-<script src="https://registry.npmmirror.com/echarts-wordcloud/2.1.0/files/dist/echarts-wordcloud.min.js"></script>
+<script src="/vendor/echarts.min.js"></script>
+<script src="/vendor/echarts-wordcloud.min.js"></script>
 <!-- Vue 3 + Element Plus -->
-<script src="https://registry.npmmirror.com/vue/3.5.13/files/dist/vue.global.prod.js"></script>
-<script src="https://registry.npmmirror.com/element-plus/2.9.1/files/dist/index.full.min.js"></script>
+<script src="/vendor/vue.global.prod.js"></script>
+<script src="/vendor/element-plus.min.js"></script>
 
 <script>
 const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
@@ -3242,7 +3239,7 @@ const app = createApp({
       if (!_threePromise) {
         _threePromise = new Promise((resolve, reject) => {
           const s = document.createElement('script');
-          s.src = 'https://registry.npmmirror.com/three/0.150.1/files/build/three.min.js';
+          s.src = '/vendor/three.min.js';
           s.async = true;
           s.onload = () => window.THREE ? resolve(window.THREE) : reject(new Error('three.js 初始化失败'));
           s.onerror = () => { _threePromise = null; reject(new Error('three.js 加载失败，请检查网络')); };
@@ -5330,10 +5327,8 @@ const app = createApp({
     // 地图注册（非阻塞）：成功后才重绘当前页州级视图
     async function registerUsaMap() {
       const mapUrls = [
-        // 本地 GeoJSON 优先（backend/usa_states.json，州名与 US_STATE_FULL 匹配），失败再回退远程源
+        // 本地 GeoJSON（backend/usa_states.json，州名与 US_STATE_FULL 匹配），离线可用
         '/usa_states.json',
-        'https://geo.datav.aliyun.com/areas_v3/bound/840000_full.json',
-        'https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@master/geojson/ne_110m_admin_1_states_provinces_shp.geojson',
       ];
       for (const url of mapUrls) {
         try {

@@ -14,6 +14,7 @@
 | MR 输入 CSV（可选） | `data/complaints_clean.csv`、`fcc_..._clean.csv` | 要现场跑集群任务才需要，共 6.3GB |
 | 未清洗原始数据（可选） | `未清洗前的源数据/CCDB/` | 6.5GB，只在 pkl 缺失时兜底 |
 | 集群 jar 与源码 | `mr/jar包/`、`mr/src/` | 集群控制台运行任务时用 |
+| 前端依赖 | `backend/vendor/` | Vue 3.5.13 / Element Plus 2.9.1 / ECharts 5.6 / three.js / 字体 / 美国州界 GeoJSON，全部本地托管 |
 | 启停 / 入库脚本 | `scripts/` | `start/stop`、`export_db/import_db`，Windows 与 Linux 各一套 |
 
 最小部署集约 **3GB**（代码 + SQL + 3 个 pkl + mr_result）。
@@ -150,3 +151,4 @@ copy backend\.env.example backend\.env   # 改 DB_PASSWORD / CLUSTER_HOST
 4. **目标机无法连接集群**：`10.15.7.101:22` 需网络可达且账号可登录；不确定时设 `CLUSTER_MOCK=1` 先验证页面。
 5. **中文目录**：`未清洗前的源数据/`、`mr/jar包/` 在 Windows/Linux 均可正常使用；Docker 挂载已在 compose 中配好，无需改路径。
 6. **数据文件缺失时的表现**：pkl 缺失会回退读同名 CSV（更慢）；连 CSV 也没有时，`ccdb_text` 才会去读 `未清洗前的源数据/CCDB/`，该目录也没有则文本分析页数据为空。
+7. **页面不依赖外网**：Vue、Element Plus、ECharts、three.js、字体、美国州界 GeoJSON 全部由 `backend/vendor/` 提供，断网或纯内网环境也能完整渲染。第三方库版本与许可证见 `backend/vendor/THIRD_PARTY_NOTICES.txt`。

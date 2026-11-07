@@ -1,0 +1,16 @@
+# 前端第三方库清单（本地托管）
+
+本目录的文件不经过 CDN，页面不再请求任何外网资源。
+
+| 文件 | 版本 | 许可证 | 上游 |
+|---|---|---|---|
+| vue.global.prod.js | 3.5.13 | MIT | https://github.com/vuejs/core |
+| element-plus.css / element-plus.min.js | 2.9.1 | MIT | https://github.com/element-plus/element-plus |
+| echarts.min.js | 5.6.0 | Apache-2.0 | https://github.com/apache/echarts |
+| echarts-wordcloud.min.js | 2.1.0 | MIT | https://github.com/ecomfe/echarts-wordcloud |
+| three.min.js | 0.150.1 | MIT | https://github.com/mrdoob/three.js |
+| three-globe.min.js | — | MIT | https://github.com/vasturiano/three-globe |
+| d3.v7.min.js / d3-force-3d.min.js / d3-octree.min.js / d3-binarytree.min.js | — | ISC | https://github.com/d3 / https://github.com/vasturiano |
+| earth-*.jpg / earth-clouds.png / earth-specular.jpg | — | 行星贴图素材 | 随 three-globe 示例分发 |
+
+各库完整许可证文本见同目录 `LICENSE-*.txt`。

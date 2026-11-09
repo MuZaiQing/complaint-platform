@@ -8,22 +8,22 @@
   - 页面5 智能预警中心   → /api/alert/*
   - 页面6 查询中心       → /api/stats/* + /api/detail/*
 """
-import os, glob, time
+import os, glob, json, time, threading, gzip
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 import pandas as pd
 import pymysql
 
 # 数据库与统计表元数据在 db_meta.py 共享（集群控制页也用它做入库白名单）
-from db_meta import DB_CONFIG, STATS_TABLES
+from db_meta import DB_CONFIG, STATS_TABLES, cache_get, cache_put, clear_table_cache
 
 DATA_ROOT = os.getenv("DATA_ROOT", r"D:\fqh\data")
 # 未清洗原始数据（仅 pkl 缺失时兜底合并，不参与日常统计）
@@ -76,24 +76,56 @@ def serve_icon():
 
 # ====================== MySQL 辅助 ======================
 
+# 每个线程复用一个连接（FastAPI 同步端点走线程池），避免每次查询都 TCP 握手 + 认证
+_TL = threading.local()
+
+
+def _conn():
+    c = getattr(_TL, "conn", None)
+    if c is not None:
+        try:
+            c.ping(reconnect=False)
+            return c
+        except Exception:
+            try:
+                c.close()
+            except Exception:
+                pass
+    c = pymysql.connect(**DB_CONFIG, autocommit=True)
+    _TL.conn = c
+    return c
 
 
 def q(sql, args=None):
-    conn = pymysql.connect(**DB_CONFIG)
     try:
-        with conn.cursor() as cur:
-            cur.execute(sql, args); return cur.fetchall()
-    finally:
-        conn.close()
+        with _conn().cursor() as cur:
+            cur.execute(sql, args)
+            return cur.fetchall()
+    except pymysql.err.OperationalError:
+        # 连接被服务端回收（wait_timeout）时重建一次再试
+        try:
+            _TL.conn.close()
+        except Exception:
+            pass
+        _TL.conn = None
+        with _conn().cursor() as cur:
+            cur.execute(sql, args)
+            return cur.fetchall()
 
 
 def read_table(name, limit=0):
+    """读预聚合表；同表结果按 TABLE_CACHE_TTL 缓存，首屏 14 次查询只打 1 次库"""
+    key = (name, limit)
+    hit = cache_get(key)
+    if hit is not None:
+        return hit
     meta = STATS_TABLES[name]
     sql = f"SELECT {', '.join(meta['cols'])} FROM {name}"
     if "sort_col" in meta: sql += f" ORDER BY {meta['sort_col']}"
     if limit > 0: sql += f" LIMIT {limit}"
-    rows = q(sql)
-    return [dict(zip(meta["cols"], r)) for r in rows]
+    rows = [dict(zip(meta["cols"], r)) for r in q(sql)]
+    cache_put(key, rows)
+    return rows
 
 
 # ====================== 页面1 · 综合驾驶舱 ======================
@@ -145,6 +177,52 @@ def dashboard_overview():
         "top5_state": top5_state,
         "state": read_table("fin_state"),   # 全量州级数据（首页州热力地图用）
     }
+
+
+# ---- 3D 地球：州 × 月时序 + 州下钻（scripts/build_geo_detail.py 的离线预聚合产物） ----
+# 离线预聚合 JSON：首次读盘后缓存「已序列化字节」，避免每次请求重复 json 编码大对象
+_JSON_BYTES = {}
+
+
+def _serve_offline_json(fname, builder, request=None):
+    hit = _JSON_BYTES.get(fname)
+    if hit is None:
+        path = os.path.join(BASE_DIR, "data", fname)
+        if not os.path.exists(path):
+            raise HTTPException(404, f"缺少 offline 预聚合文件 {fname}，请先运行 scripts/{builder}")
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+        raw = json.dumps(data, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        # 预压缩：大 JSON（散点样本 1.1MB）每次请求再压缩要几十毫秒，这里只压一次
+        hit = (raw, gzip.compress(raw, 6))
+        _JSON_BYTES[fname] = hit
+    if request is not None and "gzip" in (request.headers.get("accept-encoding") or ""):
+        return Response(content=hit[1], media_type="application/json",
+                        headers={"Content-Encoding": "gzip", "Vary": "Accept-Encoding"})
+    return Response(content=hit[0], media_type="application/json",
+                    headers={"Vary": "Accept-Encoding"})
+
+
+@app.get("/api/dashboard/geo-detail")
+def dashboard_geo_detail(request: Request):
+    """州×月时序、州内类别/企业 TOP、州人口（供人均投诉率）"""
+    return _serve_offline_json("geo_detail.json", "build_geo_detail.py", request)
+
+
+# ---- 3D 知识图谱：企业 / 产品 / 问题 月度时序（scripts/build_kg_detail.py 的离线预聚合产物） ----
+
+@app.get("/api/dashboard/kg-detail")
+def dashboard_kg_detail(request: Request):
+    """企业、金融产品、电信问题的月度计数（供时间切片 / 环比预警 / 企业趋势）"""
+    return _serve_offline_json("kg_detail.json", "build_kg_detail.py", request)
+
+
+# ---- 3D 散点：投诉文本抽样三维投影（scripts/build_scatter_samples.py 的离线产物） ----
+
+@app.get("/api/dashboard/scatter-samples")
+def dashboard_scatter_samples(request: Request):
+    """TF-IDF + SVD 降到 3 维的抽样投诉文本坐标（离群点 = 难分类样本）"""
+    return _serve_offline_json("scatter_samples.json", "build_scatter_samples.py", request)
 
 
 # ====================== 页面2 · 金融投诉统计分析 ======================

@@ -5,13 +5,13 @@ set ROOT=%~dp0..
 set PIDFILE=%ROOT%\backend\logs\app.pid
 if exist "%PIDFILE%" (
   set /p PID=<"%PIDFILE%"
-  taskkill /PID %PID% /T /F >nul 2>&1 && echo [³É¹¦] ÒÑÍ£Ö¹ PID=%PID%
+  taskkill /PID %PID% /T /F >nul 2>&1 && echo [æˆåŠŸ] å·²åœæ­¢ PID=%PID%
   del "%PIDFILE%" >nul 2>&1
 ) else (
-  echo [ĞÅÏ¢] ÎŞ PID ÎÄ¼ş£¬°´¶Ë¿Ú²éÕÒ...
+  echo [ä¿¡æ¯] æ—  PID æ–‡ä»¶ï¼ŒæŒ‰ç«¯å£æŸ¥æ‰¾...
 )
-for /f %%p in ('powershell -NoProfile -Command "(Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue).OwningProcess | Select-Object -First 1"') do (
-  taskkill /PID %%p /T /F >nul 2>&1 && echo [³É¹¦] ÒÑ°´¶Ë¿ÚÍ£Ö¹ PID=%%p
+for /f "tokens=5" %%p in ('netstat -ano ^| findstr /R /C:":8000 .*LISTENING"') do (
+  taskkill /PID %%p /T /F >nul 2>&1 && echo [æˆåŠŸ] å·²æŒ‰ç«¯å£åœæ­¢ PID=%%p
 )
-netstat -ano | findstr /R /C:":8000 .*LISTENING" >nul && ( echo [Ê§°Ü] 8000 ÈÔÔÚ¼àÌı & exit /b 1 ) || echo [Íê³É] ·şÎñÒÑÍ£Ö¹
+netstat -ano | findstr /R /C:":8000 .*LISTENING" >nul && ( echo [å¤±è´¥] 8000 ä»åœ¨ç›‘å¬ & exit /b 1 ) || echo [å®Œæˆ] æœåŠ¡å·²åœæ­¢
 endlocal

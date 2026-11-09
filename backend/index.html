@@ -845,6 +845,11 @@
     transition: opacity .2s;
   }
   .s3d-label.is-cat { color: var(--fg-0); font-weight: 600; font-size: 11px; }
+  .s3d-label.is-alert {
+    color: var(--red); border-color: color-mix(in srgb, var(--red) 55%, transparent);
+    background: color-mix(in srgb, var(--red) 14%, transparent);
+    font-weight: 700;
+  }
   .k3d-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 252px; gap: 14px; align-items: stretch; }
   .k3d-side {
     border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px;
@@ -891,6 +896,8 @@
   }
   .scene3d-stage canvas { position: relative; z-index: 1; }
   .globe-wrap { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 14px; align-items: stretch; }
+  /* 地球画布高度跟随左侧两张排行卡的总高（grid stretch），不再写死高度 */
+  .globe-wrap > #globe-stage { height: auto; min-height: 340px; }
   .globe-side {
     border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
     border-radius: 8px; padding: 10px 12px;
@@ -914,6 +921,135 @@
   .gs-bar { height: 2px; border-radius: 1px; margin-top: 3px; background: color-mix(in srgb, var(--fg-1) 12%, transparent); overflow: hidden; }
   .gs-bar > i { display: block; height: 100%; border-radius: 1px; }
   .gs-foot { margin-top: auto; font-size: 10px; color: var(--fg-3); line-height: 1.7; }
+  /* 差值为负时的弱化色 */
+  .gs-row-top b.dim { color: var(--fg-3); font-weight: 400; }
+  .gs-head .gs-cur { color: var(--fg-3); font-size: 9px; letter-spacing: 0; text-transform: none; }
+
+  /* —— 地球时间轴控制条 —— */
+  .globe-ctl {
+    position: absolute; left: 10px; top: 8px; z-index: 3;
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 6px; border-radius: 6px;
+    background: color-mix(in srgb, var(--bg-1) 78%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    font-size: 10px; color: var(--fg-2);
+  }
+  .gc-seg { display: flex; border-radius: 4px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--border) 70%, transparent); }
+  .gc-seg button, .globe-ctl > button {
+    border: 0; background: transparent; color: var(--fg-2); cursor: pointer;
+    font-size: 10px; padding: 2px 7px; font-family: inherit; line-height: 1.6;
+    transition: background-color .12s, color .12s;
+  }
+  .gc-seg button.on { background: var(--cyan-dim); color: var(--cyan); font-weight: 600; }
+  .gc-seg button:hover { color: var(--fg-0); }
+  .globe-ctl > button:hover { color: var(--fg-0); }
+  .gc-play {
+    width: 20px; height: 20px; padding: 0 !important; border-radius: 50% !important;
+    border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent) !important;
+    color: var(--cyan) !important; font-size: 9px !important; line-height: 20px;
+  }
+  .gc-play.on { background: var(--cyan-dim) !important; }
+  .gc-speed {
+    min-width: 24px; border-radius: 4px !important;
+    border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important;
+    font-family: 'JetBrains Mono', monospace !important;
+  }
+  .gc-speed.on { background: var(--cyan-dim) !important; color: var(--cyan) !important; }
+  #gc-range {
+    width: 116px; height: 3px; accent-color: var(--cyan); cursor: pointer;
+    background: color-mix(in srgb, var(--fg-1) 18%, transparent); border-radius: 2px; appearance: none;
+  }
+  #gc-range::-webkit-slider-thumb { width: 9px; height: 9px; border-radius: 50%; background: var(--cyan); }
+  .gc-month { font-family: 'JetBrains Mono', monospace; color: var(--fg-1); min-width: 52px; text-align: center; letter-spacing: 0; }
+  .gc-cum { border-radius: 4px !important; border: 1px solid color-mix(in srgb, var(--border) 70%, transparent) !important; }
+  .gc-cum.on { background: var(--cyan-dim) !important; color: var(--cyan) !important; }
+  .scene3d-legend .gc-delta { margin-left: auto; font-family: 'JetBrains Mono', monospace; color: var(--fg-2); }
+  .scene3d-legend .gc-delta b { color: var(--fin-top1); font-weight: 600; }
+  /* 地球图例移到卡片底部，避让顶部时间轴控制条 */
+  #globe-stage .scene3d-legend {
+    top: auto; bottom: 6px; left: 10px; right: 10px;
+    flex-wrap: wrap; row-gap: 2px; pointer-events: none;
+  }
+  /* —— 知识图谱：窗口/筛选工具条 + 连线粗细标尺 —— */
+  .kg-ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 400; color: var(--fg-2); }
+  .kg-min {
+    background: var(--bg-2); color: var(--fg-1); border: 1px solid var(--border);
+    border-radius: 4px; font-size: 10px; padding: 2px 4px; font-family: inherit; cursor: pointer;
+  }
+  .kg-wscale { display: inline-flex; align-items: center; gap: 3px; color: var(--fg-3); }
+  .kg-wscale i { display: inline-block; width: 11px; background: var(--cyan); border-radius: 2px; opacity: .7; }
+  .kg-wscale .w1 { height: 1px; } .kg-wscale .w2 { height: 2px; } .kg-wscale .w3 { height: 4px; }
+  /* —— 三维散点：聚类/样本/框选工具条 + 框选结果面板 —— */
+  .sc-ctl { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 400; color: var(--fg-2); }
+  .sc-cnt { font-style: normal; margin-left: 4px; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; }
+  .sc-samp-lg { display: inline-flex; align-items: center; gap: 4px; }
+  .sc-samp-dot {
+    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--fg-1); opacity: .8;
+  }
+  .sc-samp-dot.out { background: var(--red); }
+  .sc-sel {
+    position: absolute; left: 10px; bottom: 30px; z-index: 6; width: 300px; max-height: 260px;
+    display: flex; flex-direction: column; gap: 6px; overflow: hidden;
+    padding: 8px 10px; border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-2) 96%, transparent);
+    border: 1px solid var(--border); box-shadow: var(--elev-2);
+    font-size: 11px; color: var(--fg-2);
+  }
+  .sc-sel-head { display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; font-weight: 600; color: var(--fg-0); }
+  .sc-sel-x { cursor: pointer; color: var(--fg-3); font-size: 15px; line-height: 1; padding: 0 2px; }
+  .sc-sel-x:hover { color: var(--red); }
+  .sc-sel-words { display: flex; flex-wrap: wrap; gap: 4px; max-height: 52px; overflow: auto; }
+  .sc-sel-words span {
+    padding: 1px 6px; border-radius: 3px; font-size: 10px; font-family: 'JetBrains Mono', monospace;
+    background: var(--cyan-dim); color: var(--cyan); border: 1px solid color-mix(in srgb, var(--cyan) 30%, transparent);
+  }
+  .sc-sel-body { overflow-y: auto; }
+  .sc-sel-t { margin-bottom: 4px; color: var(--fg-2); }
+  .sc-sel-t b { color: var(--cyan); }
+  .sc-sel-row { padding: 3px 0; border-top: 1px dashed var(--border); line-height: 1.45; color: var(--fg-3); }
+  .sc-sel-id { margin-right: 5px; color: var(--fg-1); font-size: 10px; }
+  .sc-sel-btn {
+    flex-shrink: 0; align-self: flex-start; padding: 3px 9px; border-radius: 4px; cursor: pointer;
+    background: var(--cyan-dim); color: var(--cyan); border: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent);
+    font-family: inherit; font-size: 10px;
+  }
+  .sc-sel-btn:hover { background: color-mix(in srgb, var(--cyan) 22%, transparent); }
+  .sc-boxrect {
+    position: absolute; z-index: 5; pointer-events: none;
+    border: 1px dashed var(--cyan); background: var(--cyan-dim);
+  }
+
+  /* —— 州下钻弹窗 —— */
+  .gdrill {
+    position: absolute; right: 10px; top: 32px; z-index: 6; width: 330px;
+    display: none; padding: 8px 10px 10px;
+    background: color-mix(in srgb, var(--bg-2) 96%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+    border-radius: 8px; box-shadow: var(--elev-2);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .gdrill.show { display: block; }
+  .gdrill-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .gdrill-head b { font-size: 12px; color: var(--fg-0); font-weight: 600; }
+  .gdrill-head span { display: block; font-size: 9px; color: var(--fg-3); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .gdrill-head button {
+    border: 0; background: transparent; color: var(--fg-2); cursor: pointer;
+    font-size: 14px; line-height: 1; padding: 0 2px;
+  }
+  .gdrill-head button:hover { color: var(--fg-0); }
+  .gdrill-body { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 8px; }
+  .gdrill-pie-cell { min-width: 0; }
+  .gdrill-pie-cell .gdl-t { color: var(--fg-3); font-size: 9px; letter-spacing: .6px; margin: 0 0 2px; }
+  .gdrill-pie { height: 108px; }
+  .gdrill-lists { min-width: 0; font-size: 10px; color: var(--fg-2); }
+  .gdrill-lists .gdl-t { color: var(--fg-3); font-size: 9px; letter-spacing: .6px; text-transform: uppercase; margin: 0 0 2px; }
+  .gdrill-lists .gdl-row { display: flex; justify-content: space-between; gap: 6px; line-height: 1.75; }
+  .gdrill-lists .gdl-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .gdrill-lists .gdl-row b { font-family: 'JetBrains Mono', monospace; font-weight: 500; color: var(--fg-1); flex-shrink: 0; }
+  .gdrill-lists .gdl-sec + .gdl-sec { margin-top: 5px; }
 
   /* —— GIS 白底浮窗（悬停柱体 + 点击侧边栏同步） —— */
   .scene3d-tip.gis-tip {
@@ -1473,7 +1609,7 @@
         </span>
         <span class="upd" :title="'最近一次拉取：' + clockText">{{ autoRefresh ? '自动刷新中' : '更新于' }} {{ clockText }}</span>
         <button class="auto-btn demo" :class="{ on: demoMode }" @click="toggleDemo"
-                :title="demoMode ? '演示模式已开启：每 15s 自动滚动或切页，便于答辩巡场' : '开启演示模式：自动巡场（每 15s 滚动或切页）'">
+                :title="demoMode ? '演示模式已开启：每 5s 自动滚动或切页，便于答辩巡场' : '开启演示模式：自动巡场（每 5s 滚动或切页）'">
           {{ demoMode ? 'DEMO ON' : 'DEMO' }}
         </button>
         <button class="auto-btn" :class="{ on: autoRefresh }" @click="toggleAutoRefresh"
@@ -1534,6 +1670,51 @@
           <div class="deck-hint">拖拽 / 滑动手势切换 · 点击卡片置顶 · 悬停暂停</div>
         </div>
 
+        <!-- 3D 地球总览：CFPB 蓝色光柱 / FCC 绿色光柱，柱高 = 州投诉量（可随时间轴播放） -->
+        <div class="card mb-16">
+          <div class="card-title">美国投诉地理总览 · 3D 地球
+            <span class="hint-tag">光柱高度 = 州投诉量 · 时间轴播放 · 拖拽旋转 · 点击柱体下钻</span>
+          </div>
+          <div class="globe-wrap">
+            <div class="globe-side" id="globe-side"></div>
+            <div class="scene3d-stage" id="globe-stage">
+              <div class="globe-ctl" id="globe-ctl">
+                <div class="gc-seg">
+                  <button data-metric="total" class="on" type="button">总量</button>
+                  <button data-metric="percap" type="button">人均</button>
+                </div>
+                <button class="gc-play" id="gc-play" type="button" title="播放 / 暂停时序">▶</button>
+                <button class="gc-speed" id="gc-speed" type="button" title="切换播放速度">1×</button>
+                <input type="range" id="gc-range" min="0" max="0" value="0" step="1" aria-label="时间轴">
+                <span class="gc-month" id="gc-month">累计</span>
+                <button class="gc-cum on" id="gc-cum" type="button" title="回到累计视图">累计</button>
+              </div>
+              <div class="scene3d-legend">
+                <span><i style="background:var(--fin-top23)"></i>CFPB 金融</span>
+                <span><i style="background:var(--green)"></i>FCC 电信</span>
+                <span style="color:var(--fg-3)">单月 √ 映射放大早期波动 · 增亮 = 环比涨 ≥8%</span>
+                <span class="gc-delta" id="gc-delta">两柱同一比例尺</span>
+              </div>
+              <div class="scene3d-load" id="globe-load">正在加载 3D 地球…</div>
+              <div class="scene3d-tip" id="globe-tip"></div>
+              <div class="gdrill" id="globe-drill">
+                <div class="gdrill-head">
+                  <div><b id="gdrill-title"></b><span id="gdrill-sub"></span></div>
+                  <button id="gdrill-close" type="button" aria-label="关闭">×</button>
+                </div>
+                <div class="gdrill-body">
+                  <div class="gdrill-pie-cell">
+                    <div class="gdl-t">金融类别（全期）</div>
+                    <div class="gdrill-pie" id="gdrill-pie"></div>
+                  </div>
+                  <div class="gdrill-lists" id="gdrill-lists"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
         <div class="grid-2 mb-16" style="grid-template-columns: 2fr 1fr;">
           <!-- 双业务月度趋势 -->
           <div class="card">
@@ -1545,26 +1726,6 @@
             <div class="card-title">投诉高频词 TOP10</div>
             <div class="chart" data-chart-key="refDashWord"></div>
           </div>
-        </div>
-
-        <!-- 3D 地球总览：CFPB 蓝色光柱 / FCC 绿色光柱，柱高 = 州投诉量 -->
-        <div class="card mb-16">
-          <div class="card-title">美国投诉地理总览 · 3D 地球
-            <span class="hint-tag">光柱高度 = 州投诉量 · 拖拽旋转</span>
-          </div>
-          <div class="globe-wrap">
-            <div class="globe-side" id="globe-side"></div>
-            <div class="scene3d-stage" id="globe-stage" style="height:340px">
-              <div class="scene3d-legend">
-                <span><i style="background:var(--fin-top23)"></i>CFPB 金融</span>
-                <span><i style="background:var(--green)"></i>FCC 电信</span>
-                <span style="color:var(--fg-3)">两套柱体同一比例尺</span>
-              </div>
-              <div class="scene3d-load" id="globe-load">正在加载 3D 地球…</div>
-              <div class="scene3d-tip" id="globe-tip"></div>
-            </div>
-          </div>
-
         </div>
 
         <div class="grid-2 mb-16">
@@ -1763,13 +1924,32 @@
         <div class="card mb-16">
           <div class="card-title">投诉知识图谱 · 3D 力导向
             <span class="hint-tag">类别 · 高频词 · {{ textaiBiz==='cfpb' ? '企业' : '问题类型' }} · 点击联动右侧</span>
+            <span class="title-right kg-ctl">
+              <span class="gc-seg">
+                <button :class="{on: kgWin==='all'}" @click="setKgWin('all')">全期</button>
+                <button :class="{on: kgWin==='24m'}" @click="setKgWin('24m')">近24月</button>
+                <button :class="{on: kgWin==='12m'}" @click="setKgWin('12m')">近12月</button>
+              </span>
+              <span class="gc-seg">
+                <button :class="{on: !kgRiskOnly}" @click="setKgRisk(false)">全部</button>
+                <button :class="{on: kgRiskOnly}" @click="setKgRisk(true)">仅预警</button>
+              </span>
+              <select class="kg-min" v-model.number="kgMinCount" @change="reloadKg">
+                <option :value="0">投诉量不限</option>
+                <option :value="50000">≥5万</option>
+                <option :value="100000">≥10万</option>
+                <option :value="200000">≥20万</option>
+              </select>
+            </span>
           </div>
           <div class="k3d-wrap">
             <div class="scene3d-stage" id="kg-stage" style="height:440px">
               <div class="scene3d-legend">
-                <span><i style="background:var(--cyan)"></i>投诉类别</span>
+                <span><i style="background:var(--cyan)"></i>投诉类别（色板同 Scatter3D）</span>
                 <span><i style="background:var(--purple)"></i>{{ textaiBiz==='cfpb' ? '企业' : '问题类型' }}</span>
+                <span><i style="background:var(--red)"></i>异常预警（z≥2 / 环比≥50%）</span>
                 <span><i style="background:var(--fg-2)"></i>高频词（按类别着色）</span>
+                <span class="kg-wscale"><i class="w1"></i><i class="w2"></i><i class="w3"></i>连线粗细 = 投诉量</span>
                 <span style="color:var(--fg-3)">拖拽旋转 · 点击节点</span>
               </div>
               <div class="scene3d-load" id="kg-load">正在构建知识图谱…</div>
@@ -1782,6 +1962,11 @@
                 <div class="k3d-meta">
                   <div v-if="kgSel.freq != null">词频：<b>{{ fmt(kgSel.freq) }}</b><span v-if="kgSel.rank"> · 排名 #{{ kgSel.rank }}</span></div>
                   <div v-if="kgSel.count != null">投诉量：<b>{{ fmt(kgSel.count) }}</b><span v-if="kgSel.share != null"> · 占比 {{ kgSel.share }}%</span></div>
+                  <div v-if="kgSel.growth != null" :style="{color: kgSel.alert ? 'var(--red)' : 'inherit'}">
+                    最近 3 月环比：<b>{{ kgSel.growth >= 0 ? '+' : '' }}{{ kgSel.growth }}%</b>
+                    <span v-if="kgSel.z != null"> · z = {{ kgSel.z }}</span>
+                    <span v-if="kgSel.alert" style="color:var(--red)"> · 显著抬升</span>
+                  </div>
                   <div>{{ kgSel.note }}</div>
                 </div>
                 <div class="k3d-meta" v-if="kgSel.related && kgSel.related.length">
@@ -1796,12 +1981,33 @@
                 </div>
               </template>
               <template v-else>
-                <div class="k3d-type">节点详情</div>
-                <div class="k3d-meta">点击图谱中的任意节点：类别节点切换视角，词汇节点可直接送入 AI 模型验证，企业/问题节点可下钻查询中心。</div>
+                <div class="k3d-type">窗口洞察 · {{ kgInsight ? kgInsight.when : '全期' }}</div>
+                <div class="k3d-meta" v-if="kgInsight">
+                  <div style="margin-bottom:4px;">新增 / 增长投诉主题</div>
+                  <div class="k3d-rel">
+                    <span class="k3d-chip" v-for="t in kgInsight.themes" :key="t.name" :title="fmt(t.count) + ' 条'">
+                      {{ t.name }}<b v-if="t.growth != null" style="color:var(--red);margin-left:2px">+{{ t.growth }}%</b>
+                    </span>
+                    <span v-if="!kgInsight.themes.length" style="color:var(--fg-3)">暂无</span>
+                  </div>
+                  <div style="margin:8px 0 4px;">异常预警（环比 ≥ +50% 或 z ≥ 2）</div>
+                  <div class="k3d-rel">
+                    <span class="k3d-chip" v-for="s in kgInsight.surges" :key="s.name"
+                      style="border-color:var(--red);color:var(--red)">⚠ {{ s.name }}
+                      <template v-if="s.z >= 2"> z={{ s.z }}</template>
+                      <template v-else> {{ s.growth >= 0 ? '+' : '' }}{{ s.growth }}%</template>
+                    </span>
+                    <span v-if="!kgInsight.surges.length" style="color:var(--fg-3)">未发现显著抬升的企业/问题</span>
+                  </div>
+                  <div style="margin-top:8px;color:var(--fg-3);line-height:1.6">
+                    点击图谱节点查看详情；词频为全期口径，企业/主题随所选时间窗口变化。
+                  </div>
+                </div>
+                <div class="k3d-meta" v-else>点击图谱中的任意节点：类别节点切换视角，词汇节点可直接送入 AI 模型验证，企业/问题节点可下钻查询中心。</div>
               </template>
             </div>
           </div>
-          <div class="chart-note">口径：词节点取自 <b>MapReduce 词频 TOP30</b>，按内置词典归入类别；<b>{{ textaiBiz==='cfpb' ? '企业节点按征信/催收/银行/信用卡业务线归属连线' : '问题类型节点按词典主题归属连线' }}</b>。连线粗细表示词频/投诉量权重，仅表达主题归属，非语义共现统计。</div>
+          <div class="chart-note">口径：词节点取自 <b>MapReduce 词频 TOP30（全期）</b>，按内置词典归入类别，类别色板与 Scatter3D 一致；<b>{{ textaiBiz==='cfpb' ? '企业节点按所选窗口的投诉量计数' : '问题类型节点按所选窗口的投诉量计数' }}</b>，红色 = 最近 3 月投诉显著抬升（<b>z ≥ 2</b> 或环比 ≥ +50%）的预警节点。连线粗细表示投诉量权重，仅表达主题归属，非语义共现统计。</div>
         </div>
 
         <!-- 词云 TOP100 + TOP20 柱状（线性/对数切换） -->
@@ -1836,24 +2042,65 @@
         <!-- 3D 三维散点：词频 × 词长 × 类别，气泡大小 = 词频 -->
         <div class="card mb-16">
           <div class="card-title">文本特征三维分布 · Scatter3D
-            <span class="hint-tag">气泡大小 = 词频 · 颜色 = 类别</span>
+            <span class="title-right sc-ctl">
+              <span class="gc-seg">
+                <button :class="{on: scColor==='cat'}" @click="setScColor('cat')">类别色</button>
+                <button :class="{on: scColor==='kmeans'}" @click="setScColor('kmeans')">Kmeans</button>
+              </span>
+              <span class="gc-seg">
+                <button :class="{on: scSamples}" @click="toggleScSamples">样本投影</button>
+              </span>
+              <span class="gc-seg">
+                <button :class="{on: scBox}" @click="toggleScBox">框选</button>
+              </span>
+            </span>
           </div>
           <div class="scene3d-stage" id="scatter3d-stage" style="height:400px">
             <div class="scene3d-legend">
-              <span v-for="c in wordCatLegend(curWordFreq, textaiBiz)" :key="c.key">
-                <i :style="{ background: c.color }"></i>{{ c.name }}
-              </span>
-              <span style="color:var(--fg-3)">拖拽旋转 · 点击词做推理</span>
+              <template v-if="scColor==='cat'">
+                <span v-for="c in wordCatLegend(curWordFreq, textaiBiz)" :key="c.key">
+                  <i :style="{ background: c.color }"></i>{{ c.name }}
+                </span>
+              </template>
+              <template v-else>
+                <span v-for="c in scKmeans" :key="c.name">
+                  <i :style="{ background: c.color }"></i>{{ c.name }}<em class="sc-cnt">{{ c.count }}</em>
+                </span>
+              </template>
+              <span v-if="scSamples" class="sc-samp-lg"><i class="sc-samp-dot"></i>投诉样本<em class="sc-cnt">{{ scProjSamples.length }}</em></span>
+              <span v-if="scSamples" class="sc-samp-lg"><i class="sc-samp-dot out"></i>离群(难分类)</span>
+              <span style="color:var(--fg-3)">{{ scBox ? '拖动框选区域' : '拖拽旋转 · 点击词做推理' }}</span>
             </div>
             <div class="scatter3d-axes">
               <span class="ax-x">X · 词频（对数）</span>
               <span class="ax-y">Y · 词长（字符）</span>
               <span class="ax-z">Z · 类别序位</span>
             </div>
+            <div class="sc-sel" v-if="scSelect">
+              <div class="sc-sel-head">
+                框选 {{ scSelect.words.length }} 个词
+                <span class="sc-sel-x" @click="clearScSel">×</span>
+              </div>
+              <div class="sc-sel-words">
+                <span v-for="w in scSelect.words" :key="w">{{ w }}</span>
+              </div>
+              <div class="sc-sel-body">
+                <template v-if="scSelect.samples.length">
+                  <div class="sc-sel-t">抽样投影命中 <b>{{ scSelect.total }}</b> 条</div>
+                  <div class="sc-sel-row" v-for="(s, i) in scSelect.samples" :key="i">
+                    <span class="sc-sel-id">{{ s.cat }}</span>{{ s.t }}
+                  </div>
+                </template>
+                <div v-else class="sc-sel-t">抽样投影未命中，点下方按钮到查询中心精确检索</div>
+              </div>
+              <button class="sc-sel-btn" @click="drillToQuery(textaiBiz, { keyword: scSelect.words[0] })">
+                查询中心检索「{{ scSelect.words[0] }}」
+              </button>
+            </div>
             <div class="scene3d-load" id="scatter3d-load">正在构建三维散点…</div>
             <div class="scene3d-tip" id="scatter3d-tip"></div>
           </div>
-          <div class="chart-note">数据为 Hadoop MapReduce 词频输出：X = 词频（对数）、Y = 词长、Z = 内置词典类别，气泡半径随词频增长；非逐条预测置信度（后端未提供 per-sample 置信度）。</div>
+          <div class="chart-note">词散点来自 Hadoop MapReduce 词频输出（X = 词频对数、Y = 词长、Z = 类别序位）；<b>Kmeans</b> 对词坐标做 4 簇聚类，颜色随之切换；<b>样本投影</b>把单条投诉文本经 TF-IDF + SVD 真实降到 3 维叠加，红色 = 距簇心最远 5%（难分类样本）；<b>框选</b>模式下拖出矩形，自动检索该批词命中的抽样投诉。</div>
         </div>
 
         <!-- AI 实时预测：纯文本 / CSV 单行 双模式 -->
@@ -2583,11 +2830,37 @@ function sceneResizeHook(rec, stage) {
   window.addEventListener('resize', onResize);
   rec.cleanups.push(() => window.removeEventListener('resize', onResize));
   rec.resize = onResize;
+  s3dWatch(stage);   // 离屏自动停画
+}
+// 离屏 / 切到后台时跳过 WebGL 绘制：滚动页面或多面板同屏时不再抢主线程
+const _s3dIO = new WeakMap();
+function s3dWatch(stage) {
+  if (!stage || typeof IntersectionObserver === 'undefined' || _s3dIO.has(stage)) return;
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => { e.target.__onScreen = e.isIntersecting; });
+  }, { rootMargin: '150px' });
+  io.observe(stage);
+  _s3dIO.set(stage, io);
+  // 交互（拖拽 / 缩放 / hover）期间放行 60fps
+  ['pointerdown', 'pointermove', 'wheel', 'touchstart'].forEach(t =>
+    stage.addEventListener(t, () => { stage.__actAt = performance.now(); }, { passive: true }));
+}
+// 环境动画限 30fps（慢速自转肉眼无差），交互时自动回到 60fps，弱显卡机器明显更顺
+function s3dDrawable(stage, idleFps = 30) {
+  if (!stage || document.hidden || stage.__onScreen === false) return false;
+  const now = performance.now();
+  const fps = now - (stage.__actAt || 0) < 600 ? 60 : idleFps;
+  if (stage.__lastDraw && now - stage.__lastDraw < 1000 / fps - 1.5) return false;
+  stage.__lastDraw = now;
+  return true;
 }
 function sceneDragRotate(rec, obj, { xLimit = 1.15 } = {}) {
   const el = rec.renderer.domElement;
   let dragging = false, lx = 0, ly = 0;
-  const down = e => { dragging = true; lx = e.clientX; ly = e.clientY; el.style.cursor = 'grabbing'; };
+  const down = e => {
+    if (rec.dragBlocked && rec.dragBlocked()) return;   // 框选模式下禁用旋转
+    dragging = true; lx = e.clientX; ly = e.clientY; el.style.cursor = 'grabbing';
+  };
   const move = e => {
     if (!dragging) return;
     obj.rotation.y += (e.clientX - lx) * 0.007;
@@ -2829,7 +3102,7 @@ const app = createApp({
     };
     // ========= 移动端：侧栏抽屉 =========
     const sidebarOpen = ref(false);
-    // 演示模式（自动巡场）：15s 一段，先滚完当前页再切下一页
+    // 演示模式（自动巡场）：5s 一段，先滚完当前页再切下一页
     const demoMode = ref(
       localStorage.getItem('demoMode') === '1' ||
       new URLSearchParams(location.search).get('demo') === '1'
@@ -2850,6 +3123,7 @@ const app = createApp({
       if (glass3d.show) closeGlass3d();   // 3D 弹层内切页时先释放场景，避免 canvas 挂在已销毁的节点上
       disposeAllCharts();            // v-if 会销毁 DOM，先释放旧图表实例
       activePage.value = k;
+      if (k === 'textai' && _warmSecondary) _warmSecondary();
       if (!silent) syncUrl(_demoStep ? 'replace' : 'push');   // 手动切页写地址栏；演示巡场用 replace 不污染历史
       nextTick(() => {
         if (dataReady[k]) renderCharts(k);
@@ -2920,7 +3194,7 @@ const app = createApp({
     function startDemoTimer() {
       stopDemoTimer();
       if (!demoMode.value) return;
-      _demoTimer = setInterval(demoAdvance, 15000);
+      _demoTimer = setInterval(demoAdvance, 5000);
     }
     // 词频/词云点击 → AI 页自动填词并直接推理（答辩动线：看词 → 即时判断）
     function gotoAIKeyword(word, biz = 'cfpb') {
@@ -2948,11 +3222,32 @@ const app = createApp({
       if (activePage.value !== page || !dataReady[page]) return;
       nextTick(() => { renderCharts(page); setTimeout(resizeAllCharts, 250); });
     }
+    // 懒加载知识图谱 / 散点样本（由 loadAll 赋值，切页时按需触发）
+    let _warmSecondary = null;
 
     // ========= 全局数据 =========
     const overview = ref(null);
+    const geoDetail = ref(null);   // 3D 地球离线预聚合（州×月时序 / 州内类别 / 企业 / 人口）
+    const kgDetail = ref(null);    // 3D 知识图谱离线时序（企业/产品/问题 月度计数）
     const finData  = ref({ cards: {}, monthly: [], product: [], state: [], company_top: [], timely: [], product_timely_rate: [] });
     const fccData  = ref({ cards: {}, monthly: [], issue: [], state: [] });
+    // 知识图谱窗口/筛选（时间切片 + 节点筛选）
+    const kgWin = ref('all');
+    const kgMinCount = ref(0);
+    const kgRiskOnly = ref(false);
+    const kgInsight = ref(null);   // 侧栏「窗口洞察」：新增主题 + 环比预警企业
+    // 三维散点：Kmeans 着色 / 样本投影叠加 / 框选交互
+    const scatterSamples = ref(null);  // 离线文本投影样本（CFPB 原文 / FCC 字段）
+    const scColor = ref('cat');        // cat=类别色板 / kmeans=聚类色板
+    const scSamples = ref(true);       // 是否叠加单条投诉样本投影
+    const scBox = ref(false);          // 框选模式
+    const scSelect = ref(null);        // 框选结果：词 + 命中的抽样投诉
+    const scKmeans = ref([]);          // Kmeans 图例（簇色 + 词数）
+    // 当前业务线的抽样投影样本（图例计数 / 框选匹配）
+    const scProjSamples = computed(() => {
+      const s = scatterSamples.value;
+      return (s && s[textaiBiz.value] && s[textaiBiz.value].samples) || [];
+    });
 
     // ===== 跨页聚焦：当前月份 / 产品的上下文指标（仅用于展示，不改变统计口径） =====
     const finFocusMonth = computed(() => {
@@ -3317,7 +3612,7 @@ const app = createApp({
 
       // —— 渲染器 / 场景 / 相机 ——
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setPixelRatio(Math.min(smallScreen() ? 1.25 : 1.6, window.devicePixelRatio || 1));
       renderer.setSize(W, H);
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -3734,16 +4029,59 @@ const app = createApp({
       return out;
     }
 
-    // ---- ① 3D 地球：CFPB 蓝柱 / FCC 绿柱，柱高 = 州投诉量 ----
+    // ---- ① 3D 地球：CFPB 蓝柱 / FCC 绿柱，柱高 = 州投诉量（月/累计 · 总量/人均 · 时序播放 · 下钻） ----
+    const GLOBE_DROP = ['PR', 'GU', 'AS', 'MP', 'VI', 'AE', 'AP', 'AA'];
+    // 州×月时序访问器（离线预聚合 geo_detail.json）
+    function globeDataHelpers(geo) {
+      const months = geo.months || [];
+      const M = months.length;
+      const pop = geo.population || {};
+      const totals = { fin: (geo.fin && geo.fin.state_total) || {}, fcc: (geo.fcc && geo.fcc.state_total) || {} };
+      const series = { fin: (geo.fin && geo.fin.by_month_state) || {}, fcc: (geo.fcc && geo.fcc.by_month_state) || {} };
+      const codes = Object.keys(totals.fin).filter(c => !GLOBE_DROP.includes(c) && pop[c]);
+      const sumPop = codes.reduce((s, c) => s + (pop[c] || 0), 0);
+      const raw = (kind, code, st) => {
+        if (!st || st.idx < 0 || !M) return Number(totals[kind][code]) || 0;
+        const arr = series[kind][code];
+        return (arr && Number(arr[st.idx])) || 0;
+      };
+      const val = (kind, code, st) => {
+        const v = raw(kind, code, st);
+        return (st && st.metric === 'percap') ? (pop[code] ? v / pop[code] * 1e5 : 0) : v;
+      };
+      const agg = (kind, st) => codes.reduce((s, c) => s + raw(kind, c, st), 0);
+      const aggRate = (kind, st) => sumPop ? agg(kind, st) / sumPop * 1e5 : 0;
+      // 比例尺：累计取总量峰值；单月取「跨全部月份峰值」做固定分母，播放时柱高不抖动
+      const denom = (st) => {
+        let mx = 1;
+        if (!st || st.idx < 0) {
+          codes.forEach(c => { mx = Math.max(mx, val('fin', c, st), val('fcc', c, st)); });
+        } else {
+          const scale = c => (st.metric === 'percap' && pop[c]) ? 1e5 / pop[c] : 1;
+          codes.forEach(c => {
+            const sf = scale(c);
+            const af = series.fin[c] || [], ac = series.fcc[c] || [];
+            let pf = 0, pc = 0;
+            for (let t = 0; t < af.length; t++) if (af[t] > pf) pf = af[t];
+            for (let t = 0; t < ac.length; t++) if (ac[t] > pc) pc = ac[t];
+            mx = Math.max(mx, pf * sf, pc * sf);
+          });
+        }
+        return mx;
+      };
+      return { months, M, pop, totals, series, codes, sumPop, raw, val, agg, aggRate, denom };
+    }
+
     async function initGlobe3D() {
       if (activePage.value !== 'dashboard') return;
       const stage = document.getElementById('globe-stage');
       if (!stage) return;
-      const fin = overview.value && overview.value.state || [];
-      const fcc = fccData.value && fccData.value.state || [];
-      const sig = [theme.value, fin.length, fcc.length,
-        fin.reduce((s, x) => s + (x.complaint_count || 0), 0),
-        fcc.reduce((s, x) => s + (x.complaint_count || 0), 0)].join('|');
+      const geo = geoDetail.value;
+      if (!geo || !geo.months || !geo.fin || !geo.fcc) {
+        sceneLoad('globe-load', '3D 地球数据未就绪（geo_detail.json）');
+        return;
+      }
+      const sig = [theme.value, geo.generated_at || '', geo.months.length, geo.fin.total, geo.fcc.total].join('|');
       if (_scenes3d.globe && _scenes3d.globe.sig === sig) return;
       disposeScene3d('globe');
       const token = s3dNewToken('globe');
@@ -3755,82 +4093,99 @@ const app = createApp({
         const stage2 = document.getElementById('globe-stage');
         if (!stage2) return;
         if (!window.ThreeGlobe) throw new Error('three-globe 未就绪');
-        buildGlobeScene(THREE, window.ThreeGlobe, stage2, fin, fcc, gj);
+        buildGlobeScene(THREE, window.ThreeGlobe, stage2, geo, gj);
         if (_scenes3d.globe) _scenes3d.globe.sig = sig;
         sceneLoad('globe-load', '');
       } catch (e) {
         sceneLoad('globe-load', '3D 地球加载失败：' + (e.message || '请检查网络'));
       }
     }
-    // 州级数据栏：总量 + TOP3 州（地球右侧，避免球体独占整卡、留白过大）
-    const GLOBE_DROP = ['PR', 'GU', 'AS', 'MP', 'VI', 'AE', 'AP', 'AA'];
-    function buildGlobeSide(finRows, fccRows) {
+
+    // 侧栏：双业务 TOP5（跟随 月/累计 + 总量/人均），点击 = 地球聚焦 + 高亮该州
+    function buildGlobeSide(geo, H) {
       const box = document.getElementById('globe-side');
-      if (!box) return;
-      const sumOf = rows => (rows || []).reduce((s, r) => s + (Number(r.complaint_count) || 0), 0);
-      const top5 = rows => (rows || [])
-        .filter(r => !GLOBE_DROP.includes(r.state_code))
-        .slice()
-        .sort((a, b) => (Number(b.complaint_count) || 0) - (Number(a.complaint_count) || 0))
-        .slice(0, 5);
-      const ALL_ROWS = { fin: top5(finRows), fcc: top5(fccRows) };
-      window.__globeSideAllRows = ALL_ROWS;
-      const block = (title, color, rows, total, kind) => {
-        const maxV = rows.length ? Math.max(1, Number(rows[0].complaint_count) || 1) : 1;
-        return '<div class="gs-block">'
-          + '<div class="gs-head"><span><i style="background:' + color + '"></i>' + title + '</span><span>TOP5</span></div>'
-          + '<div class="gs-total">' + fmt(total) + '<span>条</span></div>'
-          + rows.map(r => {
-            const v = Number(r.complaint_count) || 0;
-            const pct = total ? (v / total * 100) : 0;
-            const rankIdx = rows.indexOf(r) + 1;
-            return '<div class="gs-row" data-state="' + r.state_code + '" data-kind="' + kind + '" tabindex="0" role="button">'
-              + '<div class="gs-row-top">'
-              + '<span class="gs-rank">' + rankIdx + '</span>'
-              + '<span class="gs-code">' + r.state_code + '</span>'
-              + '<span class="gs-name">' + (US_STATE_FULL[r.state_code] || r.state_code) + '</span>'
-              + '<b>' + pct.toFixed(1) + '%</b></div>'
-              + '<div class="gs-bar"><i style="width:' + Math.max(4, v / maxV * 100).toFixed(1)
-              + '%;background:' + color + '"></i></div>'
-              + '</div>';
-          }).join('')
-          + '</div>';
-      };
-      const fTotal = sumOf(finRows), cTotal = sumOf(fccRows);
-      box.innerHTML = block('CFPB 金融投诉', 'var(--fin-top23)', ALL_ROWS.fin, fTotal, 'fin')
-        + block('FCC 电信投诉', 'var(--green)', ALL_ROWS.fcc, cTotal, 'fcc')
-        + '<div class="gs-foot">点击 / 悬停州名 → 地球相机定位该州</div>';
-      // 绑定交互：每个 gs-row 触发 3D 场景的 focusState
-      const bindRow = row => {
-        const code = row.dataset.state;
-        const kind = row.dataset.kind;
-        const fire = () => {
-          const g = _scenes3d.globe;
-          if (!g || !g.focusState) return;
-          g.focusState(code);
-          // 同步激活样式
-          box.querySelectorAll('.gs-row.on').forEach(r => r.classList.remove('on'));
-          row.classList.add('on');
+      if (!box || !H) return null;
+      const { months, pop, codes, sumPop, raw, val, agg } = H;
+      const render = (st) => {
+        const when = st.idx < 0 ? '累计' : (months[st.idx] || '');
+        const suffix = st.metric === 'percap' ? '每10万人' : '条';
+        const block = (kind, title, color) => {
+          const rows = codes
+            .map(c => ({ code: c, key: val(kind, c, st), raw: raw(kind, c, st) }))
+            .sort((a, b) => b.key - a.key).slice(0, 5);
+          const maxV = rows.length ? Math.max(1e-9, rows[0].key) : 1;
+          const rawSum = agg(kind, st);
+          const totalVal = st.metric === 'percap' ? (sumPop ? rawSum / sumPop * 1e5 : 0) : rawSum;
+          const headTxt = st.metric === 'percap' ? totalVal.toFixed(1) : fmt(totalVal);
+          return '<div class="gs-block">'
+            + '<div class="gs-head"><span><i style="background:' + color + '"></i>' + title + '</span>'
+            + '<span class="gs-cur">TOP5 · ' + when + '</span></div>'
+            + '<div class="gs-total">' + headTxt + '<span>' + suffix + '</span></div>'
+            + rows.map((r, i) => {
+              const pct = rawSum ? (r.raw / rawSum * 100) : 0;
+              const right = st.metric === 'percap' ? r.key.toFixed(1) : pct.toFixed(1) + '%';
+              return '<div class="gs-row" data-state="' + r.code + '" data-kind="' + kind + '" tabindex="0" role="button">'
+                + '<div class="gs-row-top">'
+                + '<span class="gs-rank">' + (i + 1) + '</span>'
+                + '<span class="gs-code">' + r.code + '</span>'
+                + '<span class="gs-name">' + (US_STATE_FULL[r.code] || r.code) + '</span>'
+                + '<b>' + right + '</b></div>'
+                + '<div class="gs-bar"><i style="width:' + Math.max(4, (r.key / maxV) * 100).toFixed(1)
+                + '%;background:' + color + '"></i></div>'
+                + '</div>';
+            }).join('')
+            + '</div>';
         };
-        row.addEventListener('mouseenter', fire);
-        row.addEventListener('click', fire);
-        row.addEventListener('focus', fire);
+        box.innerHTML = block('fin', 'CFPB 金融投诉', 'var(--fin-top23)')
+          + block('fcc', 'FCC 电信投诉', 'var(--green)')
+          + '<div class="gs-foot">点击州名 → 聚焦 + 下钻明细 · 拖动时间轴看爆发趋势</div>';
       };
-      box.querySelectorAll('.gs-row').forEach(bindRow);
-      box.addEventListener('mouseleave', () => {
+      const activate = (e) => {
+        const row = e.target && e.target.closest ? e.target.closest('.gs-row') : null;
+        if (!row || !box.contains(row)) return;
+        const g = _scenes3d.globe;
+        if (g && g.focusState) g.focusState(row.dataset.state);
+        if (e.type === 'click' && g && g.openDrill) g.openDrill(row.dataset.state);
+        box.querySelectorAll('.gs-row.on').forEach(r => r.classList.remove('on'));
+        row.classList.add('on');
+      };
+      const leave = () => {
         const g = _scenes3d.globe;
         if (g && g.focusState) g.focusState(null);
         box.querySelectorAll('.gs-row.on').forEach(r => r.classList.remove('on'));
-      });
+      };
+      box.addEventListener('mouseover', activate);
+      box.addEventListener('click', activate);
+      box.addEventListener('focusin', activate);
+      box.addEventListener('mouseleave', leave);
+      const cleanup = () => {
+        box.removeEventListener('mouseover', activate);
+        box.removeEventListener('click', activate);
+        box.removeEventListener('focusin', activate);
+        box.removeEventListener('mouseleave', leave);
+        box.innerHTML = '';
+      };
+      return { render, cleanup };
     }
-    function buildGlobeScene(THREE, TG, stage, finRows, fccRows, gj) {
+    function buildGlobeScene(THREE, TG, stage, geo, gj) {
+      const H = globeDataHelpers(geo);
+      const side = buildGlobeSide(geo, H);   // 先渲染左侧排行卡，画布高度才能与其总高对齐
       const { w, h } = sceneSize(stage);
       const isDark = theme.value === 'dark';
       stage.querySelectorAll('canvas,.s3d-labels').forEach(c => c.remove());
-      buildGlobeSide(finRows, fccRows);
+      const st = { metric: 'total', idx: -1, playing: false };
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+      renderer.setPixelRatio(Math.min(smallScreen() ? 1.25 : 1.6, window.devicePixelRatio || 1));
+      // 软件渲染（无 GPU 加速的机器 / 远程桌面）时自动降分辨率并隐藏云层，避免 3D 面板拖慢整页
+      let softGL = false;
+      try {
+        const gl = renderer.getContext();
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        const rn = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+        softGL = /swiftshader|llvmpipe|software|basic render/i.test(rn);
+        if (softGL) renderer.setPixelRatio(1);
+      } catch (e) { /* 取不到渲染器名称就按正常画质 */ }
       renderer.setSize(w, h);
       stage.appendChild(renderer.domElement);
 
@@ -3854,36 +4209,28 @@ const app = createApp({
       const gjSafe = gj || { features: [] };
       const cent = geoCentroids(gjSafe);
 
-      // —— 数据映射：两套数据共用同一最大值归一（同比例尺横向对比） ——
+      // —— 州面底图：按累计总量抬高/着色（光柱负责时序与人均变化） ——
       const DROP = GLOBE_DROP;
-      const toMap = rows => {
-        const m = {};
-        (rows || []).forEach(r => {
-          if (DROP.includes(r.state_code) || !cent[r.state_code]) return;
-          m[r.state_code] = Number(r.complaint_count) || 0;
-        });
-        return m;
-      };
-      const finMap = toMap(finRows), fccMap = toMap(fccRows);
-      const maxAll = Math.max(1, ...Object.values(finMap), ...Object.values(fccMap));
+      const cumTotal = code => (H.raw('fin', code, { idx: -1 }) + H.raw('fcc', code, { idx: -1 }));
+      const maxCum = Math.max(1, ...H.codes.map(cumTotal));
 
       // —— three-globe：卫星地表 + 清晰州面高度差 + 州界 + 柔和大气 ——
       const NAME2CODE = {};
       Object.keys(US_STATE_FULL).forEach(k => { NAME2CODE[US_STATE_FULL[k]] = k; });
       const dropNames = new Set(DROP.map(c => US_STATE_FULL[c]).filter(Boolean));
       const cFin1 = TC().fin.top1, cFcc1 = TC().fcc.top1;
-      const hotThreshold = maxAll * 0.25;
+      const hotThreshold = maxCum * 0.25;
       const world = new TG({ animateIn: false });
       world.showGraticules(false);
       world.polygonsData(gjSafe.features.filter(f => f.geometry && !dropNames.has((f.properties || {}).name)))
         .polygonAltitude(f => {
           const code = NAME2CODE[(f.properties || {}).name];
-          const total = code ? (finMap[code] || 0) + (fccMap[code] || 0) : 0;
-          return 0.003 + (total / maxAll) * 0.045;
+          const total = code ? cumTotal(code) : 0;
+          return 0.003 + (total / maxCum) * 0.045;
         })
         .polygonCapColor(f => {
           const code = NAME2CODE[(f.properties || {}).name];
-          const total = code ? (finMap[code] || 0) + (fccMap[code] || 0) : 0;
+          const total = code ? cumTotal(code) : 0;
           const hot = total > hotThreshold;
           if (isDark) {
             const alpha = hot ? 0.78 : 0.55;
@@ -3929,21 +4276,22 @@ const app = createApp({
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 4;
         const clouds = new THREE.Mesh(
-          new THREE.SphereGeometry(R * 1.012, 96, 96),
+          new THREE.SphereGeometry(R * 1.012, 48, 48),
           new THREE.MeshStandardMaterial({
             map: tex, transparent: true, opacity: isDark ? 0.40 : 0.28, roughness: 1,
             depthWrite: false
           })
         );
         cloudsHolder.add(clouds);
+        if (softGL) clouds.visible = false;
       });
 
       // 独立州界 outline（强化清晰州界）
       const outline = globeOutlinePositions(THREE, gjSafe, R);
       if (outline.length) {
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(outline), 3));
-        group.add(new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+        const lineGeo = new THREE.BufferGeometry();
+        lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(outline), 3));
+        group.add(new THREE.LineSegments(lineGeo, new THREE.LineBasicMaterial({
           color: isDark ? 0xffffff : 0x372d23, transparent: true, opacity: isDark ? .35 : .7 })));
       }
 
@@ -3952,7 +4300,7 @@ const app = createApp({
       const up = new THREE.Vector3(0, 1, 0);
       const cols = [];
       // 浅色主题下光柱：降低饱和度、无 emissive、opacity 略降，保持克制
-      const finMat = new THREE.MeshStandardMaterial({
+      const finBaseMat = new THREE.MeshStandardMaterial({
         color: isDark ? 0x4a9fff : 0x2a5ba8,
         transparent: true, opacity: isDark ? 0.90 : 0.82,
         roughness: isDark ? 0.4 : 0.5,
@@ -3960,7 +4308,7 @@ const app = createApp({
         emissive: isDark ? 0x0a2550 : 0x000000,
         emissiveIntensity: isDark ? 0.6 : 0.0
       });
-      const fccMat = new THREE.MeshStandardMaterial({
+      const fccBaseMat = new THREE.MeshStandardMaterial({
         color: isDark ? 0x2dd4bf : 0x0d7a70,
         transparent: true, opacity: isDark ? 0.90 : 0.82,
         roughness: isDark ? 0.4 : 0.5,
@@ -3968,32 +4316,24 @@ const app = createApp({
         emissive: isDark ? 0x043330 : 0x000000,
         emissiveIntensity: isDark ? 0.6 : 0.0
       });
-      // 每州两根光柱错位：绕地球自转轴 ±0.10 rad（约 ±5.7°）
-      const offsetCol = (THREE, dirv, R, hgt, kind, code, offsetAng, mat) => {
-        const axis = new THREE.Vector3(0, 1, 0);
-        const q = new THREE.Quaternion().setFromAxisAngle(axis, offsetAng);
-        const offsetDir = dirv.clone().applyQuaternion(q);
-        const m = new THREE.Mesh(colGeo, mat);
-        m.scale.set(1, hgt, 1);
-        m.position.copy(offsetDir).multiplyScalar(R + hgt / 2);
-        m.quaternion.setFromUnitVectors(up, offsetDir);
-        m.userData = { code, kind, baseH: hgt, targetH: hgt, curH: 0, dirv: offsetDir.clone(), mat };
-        group.add(m); cols.push(m);
-        return m;
-      };
-      const buildCols = (map, mat, kind) => {
-        Object.keys(map).forEach(code => {
-          const v = map[code];
-          if (!v) return;
-          const [lat, lon] = cent[code];
-          const dirv = latLonVec(THREE, lat, lon, 1);
-          const hgt = 0.12 + (v / maxAll) * 0.88;  // 同比例尺，整体克制
-          const angOffset = kind === 'fin' ? 0.10 : -0.10;
-          offsetCol(THREE, dirv, R, hgt, kind, code, angOffset, mat);
+      const axisY = new THREE.Vector3(0, 1, 0);
+      // 每州两根光柱错位：绕地球自转轴 ±0.10 rad（约 ±5.7°）；材质按柱克隆，便于单州高亮互不影响
+      H.codes.forEach(code => {
+        if (!cent[code]) return;
+        const [lat, lon] = cent[code];
+        const baseDir = latLonVec(THREE, lat, lon, 1);
+        ['fin', 'fcc'].forEach(kind => {
+          const dirv = baseDir.clone().applyQuaternion(
+            new THREE.Quaternion().setFromAxisAngle(axisY, kind === 'fin' ? 0.10 : -0.10));
+          const mat = (kind === 'fin' ? finBaseMat : fccBaseMat).clone();
+          const m = new THREE.Mesh(colGeo, mat);
+          m.scale.set(1, 0.001, 1);
+          m.position.copy(dirv).multiplyScalar(R);
+          m.quaternion.setFromUnitVectors(up, dirv);
+          m.userData = { code, kind, dirv, mat, curH: 0, baseH: 0, up: false };
+          group.add(m); cols.push(m);
         });
-      };
-      buildCols(finMap, finMat, 'fin');
-      buildCols(fccMap, fccMat, 'fcc');
+      });
 
       // —— 相机平滑定位工具 ——
       const tgtCamPos = new THREE.Vector3();
@@ -4035,6 +4375,7 @@ const app = createApp({
       const rec = { renderer, scene, camera, canvas: renderer.domElement,
         cleanups: [], w, h, raf: 0, sig: '', userRot: false, focusState };
       _scenes3d.globe = rec;
+      rec.cleanups.push(() => { finBaseMat.dispose(); fccBaseMat.dispose(); });
 
       // —— 3D 柱体 hover / 点击 ——
       const tipBox = document.getElementById('globe-tip');
@@ -4052,44 +4393,44 @@ const app = createApp({
         if (!m || !tipBox) return;
         const r = stage.getBoundingClientRect();
         const c = m.userData.code;
-        const total = (finMap[c] || 0) + (fccMap[c] || 0);
-        const frac = maxAll ? (total / maxAll * 100).toFixed(1) : '0';
+        const fd = H.raw('fin', c, st), cd = H.raw('fcc', c, st);
+        const when = st.idx < 0 ? '累计' : (H.months[st.idx] || '');
+        const pcap = v => H.pop[c] ? (v / H.pop[c] * 1e5).toFixed(1) : '—';
         const rate = (finData.value && finData.value.cards && finData.value.cards.fin_timely_rate) || 0;
+        const all = H.agg('fin', st) + H.agg('fcc', st);
+        const frac = all ? ((fd + cd) / all * 100).toFixed(1) : '0';
         tipBox.className = 'scene3d-tip gis-tip';
         tipBox.innerHTML =
-          '<div class="gis-head">' + (US_STATE_FULL[c] || c) + ' <span class="gis-code">' + c + '</span></div>'
-          + '<div class="gis-row"><i style="background:' + cFin1 + '"></i>CFPB 金融投诉<b>' + fmt(finMap[c] || 0) + '</b></div>'
-          + '<div class="gis-row"><i style="background:' + cFcc1 + '"></i>FCC 电信投诉<b>' + fmt(fccMap[c] || 0) + '</b></div>'
-          + '<div class="gis-foot">全美及时回复率 <b>' + rate + '%</b> · 该州占双源 <b>' + frac + '%</b></div>';
+          '<div class="gis-head">' + (US_STATE_FULL[c] || c) + ' <span class="gis-code">' + c + '</span>'
+            + '<span style="opacity:.55;font-weight:400;font-size:10px;margin-left:6px">' + when + '</span></div>'
+          + '<div class="gis-row"><i style="background:' + cFin1 + '"></i>CFPB 金融投诉<b>' + fmt(fd) + '</b></div>'
+          + '<div class="gis-row"><i style="background:' + cFcc1 + '"></i>FCC 电信投诉<b>' + fmt(cd) + '</b></div>'
+          + '<div class="gis-row" style="opacity:.62"><span>人均 / 10万</span><b>金融 ' + pcap(fd) + ' · 电信 ' + pcap(cd) + '</b></div>'
+          + '<div class="gis-row" style="opacity:.62"><span>金融−电信</span><b>' + (fd - cd >= 0 ? '+' : '') + fmt(fd - cd) + '</b></div>'
+          + '<div class="gis-foot">该州占当期双源 <b>' + frac + '%</b> · 及时回复率 <b>' + rate + '%</b> · 点击柱体下钻</div>';
+        tipBox.style.transform = 'none';
+        tipBox.style.left = Math.min(r.width - 215, Math.max(8, e.clientX - r.left + 14)) + 'px';
+        tipBox.style.top = Math.max(8, e.clientY - r.top - 12) + 'px';
         tipBox.style.opacity = '1';
       };
       const hideTip = () => { if (tipBox) tipBox.style.opacity = '0'; };
 
       let hovered = null;
       let downX = 0, downY = 0;
-      // hover 高亮：深色走 emissive，浅色走 opacity
-      const hoverBase = isDark ? { ei: 0.6, op: 0.90 } : { ei: 0.0, op: 0.82 };
-      const hoverOn   = isDark ? { ei: 1.2, op: 0.90 } : { ei: 0.0, op: 1.0 };
       const onMove = e => {
         const m = pickCol(e);
-        if (m !== hovered) {
-          if (hovered) { hovered.userData.mat.emissiveIntensity = hoverBase.ei; hovered.userData.mat.opacity = hoverBase.op; }
-          hovered = m;
-          if (hovered) { hovered.userData.mat.emissiveIntensity = hoverOn.ei; hovered.userData.mat.opacity = hoverOn.op; }
-        }
+        hovered = m;   // 提亮统一交给 animate，主题深浅行为一致
         if (m) showGisTip(m, e); else hideTip();
       };
-      const onLeave = () => {
-        if (hovered) { hovered.userData.mat.emissiveIntensity = hoverBase.ei; hovered.userData.mat.opacity = hoverBase.op; }
-        hovered = null; hideTip();
-      };
+      const onLeave = () => { hovered = null; hideTip(); };
       const onDown = e => { downX = e.clientX; downY = e.clientY; rec.userRot = true; };
       const onUp = e => {
         if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 8) return;
         const m = pickCol(e);
         if (m && m.userData.code) {
-          focusLatLon(cent[m.userData.code][0], cent[m.userData.code][1]);
+          rec.focusState(m.userData.code);
           rec.userRot = false;
+          openDrill(m.userData.code);
         }
       };
       renderer.domElement.addEventListener('pointermove', onMove);
@@ -4106,8 +4447,160 @@ const app = createApp({
       });
       sceneDragRotate(rec, group);
       sceneResizeHook(rec, stage);
+      // 首帧后再对齐一次：左侧排行卡内文案换行/字体加载会改变其总高
+      requestAnimationFrame(() => { if (_scenes3d.globe === rec) rec.resize(); });
 
-      // —— 动效：光柱从地表升起 + 云层缓慢漂移 + 相机缓动 + 侧边栏 focus 联动 ——
+      // —— 州下钻弹窗：金融类别分布饼图 + 金融 TOP 企业 + 电信 TOP 问题 ——
+      const drillEl = document.getElementById('globe-drill');
+      const drillPie = document.getElementById('gdrill-pie');
+      let drillChart = null;
+      const drillSec = (title, rows) => {
+        if (!rows || !rows.length) return '';
+        return '<div class="gdl-sec"><div class="gdl-t">' + title + '</div>'
+          + rows.map(it => '<div class="gdl-row"><span title="' + it[0] + '">' + it[0] + '</span><b>' + fmt(it[1]) + '</b></div>').join('')
+          + '</div>';
+      };
+      const closeDrill = () => {
+        if (drillChart) { drillChart.dispose(); drillChart = null; }
+        if (drillEl) drillEl.classList.remove('show');
+      };
+      const openDrill = (code) => {
+        if (!drillEl) return;
+        const t = TC();
+        const fd = H.raw('fin', code, st), cd = H.raw('fcc', code, st);
+        const when = st.idx < 0 ? '累计' : (H.months[st.idx] || '');
+        const pcap = v => H.pop[code] ? (v / H.pop[code] * 1e5).toFixed(1) : '—';
+        const titleEl = document.getElementById('gdrill-title');
+        const subEl = document.getElementById('gdrill-sub');
+        const listsEl = document.getElementById('gdrill-lists');
+        if (titleEl) titleEl.textContent = (US_STATE_FULL[code] || code) + ' · ' + code;
+        if (subEl) subEl.textContent = when + ' · 金融 ' + fmt(fd) + ' / 电信 ' + fmt(cd)
+          + ' · 人均 ' + pcap(fd) + '/' + pcap(cd) + ' 每10万';
+        if (listsEl) listsEl.innerHTML =
+          drillSec('金融 TOP 企业', (geo.fin.companies && geo.fin.companies[code] || []).slice(0, 6))
+          + drillSec('电信 TOP 问题', (geo.fcc.detail && geo.fcc.detail[code] || []).slice(0, 6));
+        drillEl.classList.add('show');
+        if (drillPie) {
+          if (drillChart) drillChart.dispose();
+          drillChart = echartsInit(drillPie);
+        }
+        if (drillChart) {
+          const items = (geo.fin.detail && geo.fin.detail[code] || []).slice(0, 8);
+          drillChart.setOption({
+            backgroundColor: 'transparent',
+            color: t.wordPalette,
+            tooltip: { trigger: 'item', formatter: p => p.name + '：<b>' + fmt(p.value) + '</b>（' + p.percent.toFixed(1) + '%）' },
+            series: [{
+              type: 'pie', radius: ['42%', '70%'], center: ['50%', '50%'],
+              itemStyle: { borderColor: t.pieBorder, borderWidth: 1 },
+              label: { show: false }, labelLine: { show: false },
+              emphasis: { scale: true, scaleSize: 3 },
+              data: items.map(it => ({ name: it[0], value: it[1] })),
+            }],
+          }, true);
+          drillChart.resize();
+        }
+      };
+      const drillClose = document.getElementById('gdrill-close');
+      if (drillClose) drillClose.addEventListener('click', closeDrill);
+      rec.openDrill = openDrill;   // 供侧栏 TOP5 点击调用
+      rec.cleanups.push(() => {
+        if (drillClose) drillClose.removeEventListener('click', closeDrill);
+        closeDrill();
+      });
+
+      // —— 时间轴控制条：播放 / 拖动 / 累计 / 总量·人均 ——
+      const H0 = 0.10, HM = 0.90;
+      const monthEl = document.getElementById('gc-month');
+      const rangeEl = document.getElementById('gc-range');
+      const playBtn = document.getElementById('gc-play');
+      const cumBtn = document.getElementById('gc-cum');
+      const metricBtns = Array.from(document.querySelectorAll('#globe-ctl [data-metric]'));
+
+      const updateDelta = () => {
+        const el = document.getElementById('gc-delta');
+        if (!el) return;
+        const gaps = H.codes
+          .map(c => ({ code: c, gap: H.val('fin', c, st) - H.val('fcc', c, st) }))
+          .sort((a, b) => b.gap - a.gap)
+          .slice(0, 3)
+          .filter(g => g.gap > 0);
+        const txt = gaps.map(g => g.code + ' +' + (st.metric === 'percap' ? g.gap.toFixed(1) : fmt(g.gap))).join(' · ');
+        el.innerHTML = txt || '无正向差值';
+      };
+      const applyState = () => {
+        const dn = H.denom(st);
+        // 单月视图用 √ 型映射：早期月份投诉量只有峰值的千分之几，线性映射几乎看不见；
+        // √ 后小州/早期也能看到柱体，同时保留增长趋势（累计视图仍用线性，便于读总量对比）
+        const gamma = st.idx < 0 ? 1 : 0.55;
+        cols.forEach(m => {
+          const d = m.userData;
+          const v = H.val(d.kind, d.code, st);
+          d.baseH = v > 0 ? H0 + Math.pow(v / dn, gamma) * HM : 0.001;
+          // 环比增长标记：播放时增亮，让月度变化看得见（阈值 8%，避开小幅波动）
+          const prev = st.idx > 0 ? H.val(d.kind, d.code, { idx: st.idx - 1, metric: st.metric }) : 0;
+          d.up = st.idx > 0 && v > prev * 1.08;
+        });
+        if (side) side.render(st);
+        if (monthEl) monthEl.textContent = st.idx < 0 ? '累计' : (H.months[st.idx] || '');
+        if (rangeEl) {
+          rangeEl.max = String(Math.max(0, H.M - 1));
+          rangeEl.value = String(st.idx < 0 ? Math.max(0, H.M - 1) : st.idx);
+        }
+        if (cumBtn) cumBtn.classList.toggle('on', st.idx < 0);
+        if (playBtn) { playBtn.classList.toggle('on', st.playing); playBtn.textContent = st.playing ? '❚❚' : '▶'; }
+        metricBtns.forEach(b => b.classList.toggle('on', b.dataset.metric === st.metric));
+        updateDelta();
+      };
+
+      // 播放速度：1× = 200ms/月（179 个月约 36s），2× / 4× 递进加速
+      const SPEEDS = [200, 100, 50];
+      const SPEED_LABELS = ['1×', '2×', '4×'];
+      let speedIdx = 0, playTimer = 0;
+      const speedBtn = document.getElementById('gc-speed');
+      const stopPlay = () => { if (playTimer) { clearInterval(playTimer); playTimer = 0; } st.playing = false; };
+      const stepPlay = () => {
+        st.idx = (st.idx < 0 ? 0 : st.idx + 1) % Math.max(1, H.M);
+        applyState();
+      };
+      const startPlay = () => {
+        if (st.playing || !H.M) return;
+        st.playing = true;
+        if (st.idx < 0) st.idx = 0;
+        applyState();
+        playTimer = setInterval(() => { if (!document.hidden) stepPlay(); }, SPEEDS[speedIdx]);
+      };
+      const togglePlay = () => { if (st.playing) { stopPlay(); applyState(); } else startPlay(); };
+      const cycleSpeed = () => {
+        speedIdx = (speedIdx + 1) % SPEEDS.length;
+        if (speedBtn) speedBtn.textContent = SPEED_LABELS[speedIdx];
+        if (st.playing) { stopPlay(); startPlay(); }   // 立即以新速度重播
+      };
+      const onRange = e => { stopPlay(); st.idx = parseInt(e.target.value, 10); applyState(); };
+      const onCum = () => { stopPlay(); st.idx = -1; applyState(); };
+      const onMetric = e => {
+        const b = e.target && e.target.closest ? e.target.closest('[data-metric]') : null;
+        if (!b) return;
+        st.metric = b.dataset.metric;
+        applyState();
+      };
+      if (playBtn) playBtn.addEventListener('click', togglePlay);
+      if (speedBtn) speedBtn.addEventListener('click', cycleSpeed);
+      if (rangeEl) rangeEl.addEventListener('input', onRange);
+      if (cumBtn) cumBtn.addEventListener('click', onCum);
+      metricBtns.forEach(b => b.addEventListener('click', onMetric));
+      rec.cleanups.push(() => {
+        stopPlay();
+        if (playBtn) playBtn.removeEventListener('click', togglePlay);
+        if (speedBtn) speedBtn.removeEventListener('click', cycleSpeed);
+        if (rangeEl) rangeEl.removeEventListener('input', onRange);
+        if (cumBtn) cumBtn.removeEventListener('click', onCum);
+        metricBtns.forEach(b => b.removeEventListener('click', onMetric));
+      });
+      rec.cleanups.push(() => side && side.cleanup && side.cleanup());
+      applyState();
+
+      // —— 动效：光柱向目标高度缓动（入场 / 切月 / 切维度统一走同一条曲线） ——
       const t0 = performance.now();
       const focusCodeRef = { v: null };
       const origFocusState = rec.focusState;
@@ -4118,25 +4611,25 @@ const app = createApp({
 
       const animate = () => {
         rec.raf = requestAnimationFrame(animate);
-        if (document.hidden) return;
+        if (!s3dDrawable(stage)) return;
         const now = performance.now();
         const dt = 1 / 60;
 
         // 云层极缓慢漂移
         if (cloudsHolder) cloudsHolder.rotation.y = (now / 40000) % (Math.PI * 2);
 
-        // 光柱入场：从地表升起，stagger 每个柱体延迟 40ms，900ms 完成
-        cols.forEach((m, i) => {
-          const delayMs = i * 40;
-          const t = Math.max(0, (now - t0 - delayMs) / 900);
-          const ease = t < 0 ? 0 : (t > 1 ? 1 : 1 - Math.pow(1 - t, 3));
-          m.userData.curH = ease * m.userData.baseH;
-          m.scale.y = Math.max(0.001, m.userData.curH);
-          m.position.copy(m.userData.dirv).multiplyScalar(R + m.userData.curH / 2);
-          // focus 状态提亮（深色走 opacity boost，浅色亦同但基础值不同）
-          const baseOp = isDark ? 0.90 : 0.82;
-          const boost = (focusCodeRef.v === m.userData.code) ? 1.25 : 1.0;
-          m.userData.mat.opacity = Math.min(1, baseOp * boost);
+        cols.forEach(m => {
+          const d = m.userData;
+          // 播放时加快缓动（50ms/月也能跟上），暂停时保持柔和过渡
+          d.curH += (d.baseH - d.curH) * (st.playing ? 0.34 : 0.13);
+          const hh = Math.max(0.001, d.curH);
+          m.scale.y = hh;
+          m.position.copy(d.dirv).multiplyScalar(R + hh / 2);
+          const hot = (hovered === m) || (focusCodeRef.v === d.code);
+          d.mat.opacity = hot ? (isDark ? 1.0 : 0.96) : (isDark ? 0.90 : 0.82);
+          // 环比增长 ≥8% 的州在播放时增亮，突出投诉抬升
+          const glow = hot ? 1.35 : (d.up ? 1.05 : 0.6);
+          d.mat.emissiveIntensity = isDark ? glow : (d.up && st.idx >= 0 ? 0.22 : 0.0);
         });
 
         // 相机 smoothLookAt
@@ -4157,10 +4650,6 @@ const app = createApp({
       animate();
     }
     // ---- ② 知识图谱：类别 / 高频词 / 企业（FCC 为问题类型）力导向 ----
-    const KG_PALETTE = () => {
-      const t = TC();
-      return [t.line1, t.yes, t.no, t.line2, t.axisLabel, '#8FA6C4'];
-    };
     function companyCategory(name) {
       const n = String(name || '').toLowerCase();
       if (/equifax|experian|transunion|credit/.test(n)) return 'credit';
@@ -4178,16 +4667,111 @@ const app = createApp({
       if (/Equipment/i.test(n)) return 'device';
       return 'other';
     }
+    // 时间切片窗口：all=全期 / 24m=近24月 / 12m=近12月（返回起始下标）
+    const KG_WINS = { all: 0, '24m': 24, '12m': 12 };
+    function kgWinStart(len, win) {
+      const n = KG_WINS[win] || 0;
+      return n > 0 ? Math.max(0, len - n) : 0;
+    }
+    // 区间求和（月度计数数组）
+    function winSum(arr, a, b) {
+      if (!arr) return 0;
+      let s = 0;
+      for (let i = Math.max(0, a); i <= b && i < arr.length; i++) s += Number(arr[i] || 0);
+      return s;
+    }
+    // 最近 3 月 vs 前 3 月环比（%）；前 3 月基数过小不判定（避免小样本噪声）
+    function mom3(arr, minBase = 200) {
+      if (!arr || arr.length < 6) return { growth: null, last3: 0, prev3: 0 };
+      const L = arr.length;
+      const last3 = winSum(arr, L - 3, L - 1);
+      const prev3 = winSum(arr, L - 6, L - 4);
+      if (prev3 < minBase) return { growth: null, last3, prev3 };
+      return { growth: Math.round((last3 - prev3) / prev3 * 100), last3, prev3 };
+    }
+    // 异常判定：环比 ≥ +50% 为「暴涨」；z ≥ 2 为「显著高于过去 24 月均值」
+    // （大体量企业月度波动小，单看环比会漏报；z 检验能把真实的抬升识别出来）
+    function anomStat(arr) {
+      const L = (arr || []).length;
+      const m = mom3(arr, 200);
+      if (L < 9) return { ...m, z: 0, mean: 0 };
+      const last3 = winSum(arr, L - 3, L - 1);
+      const base = arr.slice(Math.max(0, L - 27), L - 3);   // 前 24 个月
+      const n = base.length;
+      const mean = base.reduce((s, v) => s + Number(v || 0), 0) / n;
+      const sd = Math.sqrt(base.reduce((s, v) => s + (v - mean) * (v - mean), 0) / Math.max(1, n - 1));
+      const z = sd > 0 ? ((last3 / 3) - mean) / (sd / Math.sqrt(3)) : 0;
+      return { ...m, z: Math.round(z * 10) / 10, mean: Math.round(mean) };
+    }
+    // 迷你折线：企业/主题近 24 月投诉趋势（无坐标轴，用于 hover tooltip / 侧栏）
+    function sparkSvg(arr, color, w = 124, h = 30) {
+      const a = (arr || []).slice(-24);
+      const n = a.length;
+      if (!n) return '';
+      const mx = Math.max(1, ...a);
+      const pts = a.map((v, i) => {
+        const x = n > 1 ? (i / (n - 1)) * (w - 2) + 1 : w / 2;
+        const y = h - 2 - (Number(v) || 0) / mx * (h - 4);
+        return x.toFixed(1) + ',' + y.toFixed(1);
+      }).join(' ');
+      return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h
+        + '" style="display:block;margin:2px 0"><polyline points="' + pts
+        + '" fill="none" stroke="' + color + '" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+    }
+    // Kmeans（3 维，Lloyd 迭代）：最远点初始化，保证结果确定可复现
+    function kmeans3d(pts, k, iters = 24) {
+      const n = pts.length;
+      if (!n || k <= 0) return { labels: [], counts: [] };
+      k = Math.min(k, n);
+      const dist2 = (p, c) => (p[0] - c[0]) ** 2 + (p[1] - c[1]) ** 2 + (p[2] - c[2]) ** 2;
+      // 最远点初始化：先取离原点最远样本，再逐步取距已有簇心最远者
+      const cen = [pts.reduce((best, p) => (dist2(p, [0, 0, 0]) > dist2(best, [0, 0, 0]) ? p : best), pts[0])];
+      while (cen.length < k) {
+        let bi = 0, bd = -1;
+        for (let i = 0; i < n; i++) {
+          const d = Math.min(...cen.map(c => dist2(pts[i], c)));
+          if (d > bd) { bd = d; bi = i; }
+        }
+        cen.push(pts[bi]);
+      }
+      const labels = new Array(n).fill(0);
+      for (let it = 0; it < iters; it++) {
+        let moved = false;
+        for (let i = 0; i < n; i++) {
+          let l = 0, bd = Infinity;
+          for (let c = 0; c < k; c++) {
+            const d = dist2(pts[i], cen[c]);
+            if (d < bd) { bd = d; l = c; }
+          }
+          if (labels[i] !== l) { labels[i] = l; moved = true; }
+        }
+        const sum = Array.from({ length: k }, () => [0, 0, 0, 0]);
+        for (let i = 0; i < n; i++) {
+          const s = sum[labels[i]];
+          s[0] += pts[i][0]; s[1] += pts[i][1]; s[2] += pts[i][2]; s[3]++;
+        }
+        for (let c = 0; c < k; c++) if (sum[c][3]) cen[c] = [sum[c][0] / sum[c][3], sum[c][1] / sum[c][3], sum[c][2] / sum[c][3]];
+        if (!moved) break;
+      }
+      const counts = new Array(k).fill(0);
+      labels.forEach(l => { counts[l]++; });
+      return { labels, counts };
+    }
     async function initKnowledge3D() {
       if (activePage.value !== 'textai') return;
       const stage = document.getElementById('kg-stage');
       if (!stage) return;
+      const kg = kgDetail.value;
+      if (!kg || !kg.months) {
+        sceneLoad('kg-load', '知识图谱时序数据未就绪（kg_detail.json）');
+        return;
+      }
       const biz = textaiBiz.value;
       const wf = curWordFreq.value || [];
-      const ents = biz === 'cfpb'
-        ? (finData.value.company_top || overview.value && overview.value.top5_company || []).slice(0, 6)
-        : (fccData.value.issue || []).slice(0, 5);
-      const sig = [theme.value, biz, wf.length, wf[0] && wf[0].word, ents.length].join('|');
+      const entMap = (kg.fin && kg.fin.company_month) || (kg.fcc && kg.fcc.issue_month) || {};
+      const sig = [theme.value, biz, wf.length, wf[0] && wf[0].word,
+        kgWin.value, kgMinCount.value, kgRiskOnly.value ? 1 : 0,
+        Object.keys(entMap).length, kg.generated_at || ''].join('|');
       if (_scenes3d.kg && _scenes3d.kg.sig === sig) return;
       disposeScene3d('kg');
       kgSel.value = null;
@@ -4214,7 +4798,7 @@ const app = createApp({
       stage.querySelectorAll('canvas,.s3d-labels').forEach(c => c.remove());
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(smallScreen() ? 1.5 : 2, window.devicePixelRatio || 1));
+      renderer.setPixelRatio(Math.min(smallScreen() ? 1.25 : 1.6, window.devicePixelRatio || 1));
       renderer.setSize(w, h);
       stage.appendChild(renderer.domElement);
       const scene = new THREE.Scene();
@@ -4253,23 +4837,20 @@ const app = createApp({
         halos.push({ n, h, ph: Math.random() * Math.PI * 2 });
       });
 
-      const linkGeo = new THREE.BufferGeometry();
-      const linkPos = new Float32Array(links.length * 6);
-      const linkCol = new Float32Array(links.length * 6);
-      links.forEach((l, i) => {
-        const c = nodeById[l.target].color;
-        const col = new THREE.Color(c);
-        for (let k = 0; k < 2; k++) {
-          linkCol[i * 6 + k * 3] = col.r;
-          linkCol[i * 6 + k * 3 + 1] = col.g;
-          linkCol[i * 6 + k * 3 + 2] = col.b;
-        }
+      // 边权重语义化：逐条圆柱（半径 ∝ √投诉量），替代 LineSegments（WebGL 线宽不可控）
+      const maxLinkW = Math.max(1, ...links.map(l => l.weight || 1));
+      const linkGeo = new THREE.CylinderGeometry(1, 1, 1, 6, 1, true);
+      const UP = new THREE.Vector3(0, 1, 0);
+      const linkMeshes = links.map(l => {
+        const tgt = nodeById[l.target];
+        const col = new THREE.Color(tgt ? tgt.color : '#8FA6C4');
+        const rad = 0.006 + Math.sqrt((l.weight || 1) / maxLinkW) * 0.020;
+        const mesh = new THREE.Mesh(linkGeo, new THREE.MeshBasicMaterial({
+          color: col, transparent: true, opacity: .50, depthWrite: false }));
+        mesh.userData.rad = rad;
+        group.add(mesh);
+        return mesh;
       });
-      linkGeo.setAttribute('position', new THREE.BufferAttribute(linkPos, 3));
-      linkGeo.setAttribute('color', new THREE.BufferAttribute(linkCol, 3));
-      const linkObj = new THREE.LineSegments(linkGeo, new THREE.LineBasicMaterial({
-        vertexColors: true, transparent: true, opacity: .42 }));
-      group.add(linkObj);
 
       // 连线流光：沿链路滑动的粒子，强化「神经网络链路」质感
       const flowLinks = links.slice(0, smallScreen() ? 20 : 36);
@@ -4294,8 +4875,8 @@ const app = createApp({
         .sort((a, b) => (a.type === 'word' ? 1 : 0) - (b.type === 'word' ? 1 : 0));
       labelNodes.forEach(n => {
         const el = document.createElement('div');
-        el.className = 's3d-label' + (n.type === 'cat' ? ' is-cat' : '');
-        el.textContent = n.type === 'ent' ? shortName(n.name, 16) : n.name;
+        el.className = 's3d-label' + (n.type === 'cat' ? ' is-cat' : '') + (n.alert ? ' is-alert' : '');
+        el.textContent = (n.alert ? '⚠ ' : '') + (n.type === 'ent' ? shortName(n.name, 16) : n.name);
         labelsBox.appendChild(el);
         n.labelEl = el;
       });
@@ -4332,10 +4913,29 @@ const app = createApp({
       const showTip = (n, e) => {
         if (!n || !tipBox) return;
         const r = stage.getBoundingClientRect();
-        tipBox.innerHTML = '<b>' + n.name + '</b>'
-          + (n.type === 'word' ? '<br/>词频：<b>' + fmt(n.freq) + '</b> · #' + n.rank : '')
-          + (n.count != null ? '<br/>投诉量：<b>' + fmt(n.count) + '</b>' : '')
-          + '<br/><span style="color:' + TC().axisLabel + '">点击查看关联节点</span>';
+        const t = TC();
+        let html = '<b>' + n.name + '</b>';
+        if (n.type === 'word') html += '<br/>词频：<b>' + fmt(n.freq) + '</b> · #' + n.rank;
+        if (n.count != null) {
+          html += '<br/>投诉量：<b>' + fmt(n.count) + '</b>'
+            + (n.share != null ? ' · 占比 ' + n.share + '%' : '');
+        }
+        if (n.growth != null) {
+          const gc = n.z >= 2 || n.growth >= 50 ? t.no : t.axisLabel;
+          html += '<br/><span style="color:' + gc + '">最近 3 月环比 '
+            + (n.growth >= 0 ? '+' : '') + n.growth + '%</span>';
+        }
+        if (n.z) {
+          const hot = n.z >= 2;
+          html += '<br/><span style="color:' + (hot ? t.no : t.axisLabel) + '">近 3 月均值 z = ' + n.z
+            + (hot ? ' · 显著高于历史（预警）' : '') + '</span>';
+        }
+        if (n.series && n.series.length) {
+          html += '<div style="margin-top:2px;color:' + t.axisLabel + '">近 24 月投诉趋势</div>'
+            + sparkSvg(n.series, n.alert ? t.no : t.purple);
+        }
+        html += '<br/><span style="color:' + t.axisLabel + '">点击查看关联节点</span>';
+        tipBox.innerHTML = html;
         tipBox.style.left = (e.clientX - r.left) + 'px';
         tipBox.style.top = (e.clientY - r.top) + 'px';
         tipBox.style.opacity = '1';
@@ -4350,16 +4950,8 @@ const app = createApp({
       const paintFocus = sel => {
         links.forEach((l, i) => {
           const rel = !sel || l.source === sel.id || l.target === sel.id;
-          const c = new THREE.Color(nodeById[l.target].color);
-          const k = (sel && !rel) ? .16 : 1;
-          for (let j = 0; j < 2; j++) {
-            linkCol[i * 6 + j * 3] = c.r * k;
-            linkCol[i * 6 + j * 3 + 1] = c.g * k;
-            linkCol[i * 6 + j * 3 + 2] = c.b * k;
-          }
+          linkMeshes[i].material.opacity = sel ? (rel ? .78 : .10) : .50;
         });
-        linkGeo.attributes.color.needsUpdate = true;
-        linkObj.material.opacity = sel ? .9 : .42;
         nodes.forEach(n => {
           const rel = !sel || n === sel
             || links.some(l => (l.source === sel.id && l.target === n.id) || (l.target === sel.id && l.source === n.id));
@@ -4388,10 +4980,16 @@ const app = createApp({
           freq: n.type === 'word' ? n.freq : null,
           rank: n.type === 'word' ? n.rank : null,
           count: n.count != null ? n.count : null,
+          share: n.share != null ? n.share : null,
+          growth: n.growth != null ? n.growth : null,
+          z: n.z != null ? n.z : null,
+          alert: !!n.alert,
           word: n.type === 'word' ? n.name : null,
           drill: n.type !== 'cat',
           note: n.type === 'cat' ? '聚合该类别下的高频词，节点大小与词频总量相关。'
-            : n.type === 'ent' ? '连线表示业务线/主题归属，非语义共现。'
+            : n.type === 'ent' ? (n.alert
+              ? '最近 3 月投诉水平显著抬升（z ≥ 2 或环比 ≥ +50%），已在图谱中标红预警。'
+              : '连线表示业务线/主题归属，非语义共现。')
             : '词节点来自 Hadoop MapReduce 词频输出，连线指向所属类别。',
           related,
         };
@@ -4432,27 +5030,34 @@ const app = createApp({
       sceneResizeHook(rec, stage);
 
       const tmpV = new THREE.Vector3();
+      const tmpDir = new THREE.Vector3();
       const animate = () => {
         rec.raf = requestAnimationFrame(animate);
-        if (document.hidden) return;
+        if (!s3dDrawable(stage)) return;
         // 布局已由 d3-force-3d 离线收敛，动画期只做旋转与流光，不再逐步求解
         if (!rec.dragging()) group.rotation.y += 0.0014;
 
+        // 圆柱连线：中点定位 + 朝向对齐 + 半径∝√权重
         links.forEach((l, i) => {
           const a = nodeById[l.source].pos, b = nodeById[l.target].pos;
-          linkPos[i * 6] = a.x; linkPos[i * 6 + 1] = a.y; linkPos[i * 6 + 2] = a.z;
-          linkPos[i * 6 + 3] = b.x; linkPos[i * 6 + 4] = b.y; linkPos[i * 6 + 5] = b.z;
+          const m = linkMeshes[i];
+          m.position.copy(a).add(b).multiplyScalar(0.5);
+          tmpDir.copy(b).sub(a);
+          const len = tmpDir.length() || 0.001;
+          m.quaternion.setFromUnitVectors(UP, tmpDir.multiplyScalar(1 / len));
+          m.scale.set(m.userData.rad, len, m.userData.rad);
         });
-        linkGeo.attributes.position.needsUpdate = true;
 
         // 连线流光粒子 + 主节点呼吸光晕
         const now = performance.now();
         flows.forEach((f, i) => {
+          const l = links[f.li];
+          if (!l) return;
           f.t = (f.t + f.sp * .016) % 1;
-          const a = f.li * 6;
-          fPos[i * 3] = linkPos[a] + (linkPos[a + 3] - linkPos[a]) * f.t;
-          fPos[i * 3 + 1] = linkPos[a + 1] + (linkPos[a + 4] - linkPos[a + 1]) * f.t;
-          fPos[i * 3 + 2] = linkPos[a + 2] + (linkPos[a + 5] - linkPos[a + 2]) * f.t;
+          const a = nodeById[l.source].pos, b = nodeById[l.target].pos;
+          fPos[i * 3] = a.x + (b.x - a.x) * f.t;
+          fPos[i * 3 + 1] = a.y + (b.y - a.y) * f.t;
+          fPos[i * 3 + 2] = a.z + (b.z - a.z) * f.t;
         });
         fGeo.attributes.position.needsUpdate = true;
         halos.forEach(o => {
@@ -4487,24 +5092,34 @@ const app = createApp({
     }
     function buildKgModel(biz) {
       const t = TC();
-      const palette = KG_PALETTE();
+      const kg = kgDetail.value;
+      const L = (kg && kg.months && kg.months.length) || 0;
+      const a = kgWinStart(L, kgWin.value);
+      const b = L - 1;
+      const when = kgWin.value === '12m' ? '近 12 个月' : kgWin.value === '24m' ? '近 24 个月' : '全期';
+
+      // 1) 词节点 + 类别节点（词频为全期口径，Hadoop MapReduce 输出）
       const wfAll = curWordFreq.value || [];
       const wf = wfAll.slice(0, smallScreen() ? 22 : 30);
       const maxFreq = Math.max(1, ...wf.map(w => w.freq));
-      // 1) 类别节点：来自词典归类，仅保留实际有词的类别
       const catMap = {};
       wf.forEach(w => {
         const c = wordCategory(w.word, biz);
         const key = c.key === 'other' ? '__other' : c.key;
-        if (!catMap[key]) catMap[key] = { key: c.key, name: c.name, total: 0 };
+        if (!catMap[key]) catMap[key] = { cat: c, total: 0 };
         catMap[key].total += w.freq;
       });
-      const cats = Object.keys(catMap).map((k, i) => ({
-        id: 'cat:' + k, type: 'cat', name: catMap[k].name, catKey: k,
-        color: palette[i % palette.length], size: 0.17, count: null, freq: null }));
+      const keys = Object.keys(catMap);
+      const maxCatTotal = Math.max(1, ...keys.map(k => catMap[k].total));
+      // 类别色板统一对齐 Scatter3D（wordCatColor → THEMES[theme].wordCat）
+      const cats = keys.map(k => ({
+        id: 'cat:' + k, type: 'cat', name: catMap[k].cat.name, catKey: k,
+        color: wordCatColor(catMap[k].cat),
+        size: 0.13 + Math.sqrt(catMap[k].total / maxCatTotal) * 0.06,
+        count: null, freq: null, alert: false }));
       const catNodeBy = {};
-      cats.forEach(c => { catNodeBy[c.catKey === 'other' ? '__other' : c.catKey] = c; });
-      // 2) 词节点
+      keys.forEach((k, i) => { catNodeBy[k] = cats[i]; });
+
       const nodes = cats.slice();
       const links = [];
       const wordRank = {};
@@ -4516,36 +5131,93 @@ const app = createApp({
         const node = {
           id: 'word:' + w.word, type: 'word', name: w.word, catKey: ck,
           color: cat ? cat.color : t.axisLabel, freq: w.freq, rank: wordRank[w.word],
-          size: 0.033 + Math.sqrt(w.freq / maxFreq) * 0.052,
+          size: 0.033 + Math.sqrt(w.freq / maxFreq) * 0.052, alert: false,
         };
         nodes.push(node);
         links.push({ source: node.id, target: cat.id, weight: w.freq, kind: 'word' });
       });
-      // 3) 企业节点（CFPB）/ 问题类型节点（FCC）
-      let ents = [];
-      if (biz === 'cfpb') {
-        const rows = (finData.value.company_top && finData.value.company_top.length)
-          ? finData.value.company_top : (overview.value && overview.value.top5_company || []);
-        ents = rows.slice(0, 6).map(r => ({ name: r.company_name, count: r.complaint_count, catKey: companyCategory(r.company_name) }));
-      } else {
-        ents = (fccData.value.issue || []).slice(0, 5).map(r => ({ name: r.issue_name, count: r.complaint_count, catKey: issueCategory(r.issue_name) }));
+
+      // 2) 企业节点（CFPB）/ 问题类型节点（FCC）：按所选时间窗口计数 + 最近 3 月环比
+      const srcMap = biz === 'cfpb'
+        ? ((kg && kg.fin && kg.fin.company_month) || {})
+        : ((kg && kg.fcc && kg.fcc.issue_month) || {});
+      let ents = Object.keys(srcMap).map(name => {
+        const series = srcMap[name] || [];
+        const win = L ? winSum(series, a, b) : 0;
+        const st = anomStat(series);
+        return {
+          name, series, win: win, growth: st.growth, z: st.z, mean: st.mean,
+          catKey: biz === 'cfpb' ? companyCategory(name) : issueCategory(name),
+        };
+      }).filter(e => e.win > 0);
+
+      // 兜底：离线时序缺失时回落到全期 TOP 榜单（无趋势 / 无环比）
+      if (!ents.length) {
+        const rows = biz === 'cfpb'
+          ? ((finData.value.company_top && finData.value.company_top.length)
+            ? finData.value.company_top : (overview.value && overview.value.top5_company || []))
+          : (fccData.value.issue || []);
+        ents = rows.map(r => {
+          const name = biz === 'cfpb' ? r.company_name : r.issue_name;
+          return {
+            name, series: null, win: r.complaint_count, growth: null, z: 0, mean: 0,
+            catKey: biz === 'cfpb' ? companyCategory(name) : issueCategory(name),
+          };
+        });
       }
+
+      // 节点筛选：投诉量下限（当前窗口）+ 仅预警（环比 ≥ +50% 或 z ≥ 2）
+      const isAlert = e => (e.z || 0) >= 2 || (e.growth != null && e.growth >= 50);
+      const minCount = Number(kgMinCount.value) || 0;
+      ents = ents.filter(e => e.win >= minCount);
+      if (kgRiskOnly.value) ents = ents.filter(isAlert);
+      ents.sort((x, y) => y.win - x.win);
+      ents = ents.slice(0, smallScreen() ? 5 : 7);
+      const maxEntWin = Math.max(1, ...ents.map(e => e.win));
+      const entTotal = ents.reduce((s, e) => s + e.win, 0);
+      // 归属类别缺失时回落到当前规模最大的类别，保证企业/问题节点不会孤立漂浮
+      const fallbackCat = cats.slice().sort((x, y) => y.size - x.size)[0];
+
       ents.forEach((e, i) => {
-        let cat = catNodeBy[e.catKey];
-        if (!cat) cat = catNodeBy['__other'];
+        const cat = catNodeBy[e.catKey] || catNodeBy['__other'] || fallbackCat;
         if (!cat) return;
+        const alert = isAlert(e);
         const node = {
           id: 'ent:' + i, type: 'ent', name: e.name, catKey: e.catKey,
-          color: TC().purple, count: e.count, freq: null, size: 0.11,
+          color: alert ? t.no : t.purple, count: e.win,
+          share: entTotal ? Math.round(e.win / entTotal * 1000) / 10 : null,
+          growth: e.growth, z: e.z || 0, mean: e.mean || 0,
+          series: e.series, alert: alert, freq: null,
+          size: 0.075 + Math.sqrt(e.win / maxEntWin) * 0.075,
         };
         nodes.push(node);
-        links.push({ source: node.id, target: cat.id, weight: e.count || 1, kind: 'ent' });
+        links.push({ source: node.id, target: cat.id, weight: e.win || 1, kind: 'ent' });
       });
+
+      // 3) 窗口洞察：新增/增长主题（产品/问题）+ 环比预警企业
+      const themeMap = biz === 'cfpb'
+        ? ((kg && kg.fin && kg.fin.product_month) || {})
+        : ((kg && kg.fcc && kg.fcc.issue_month) || {});
+      const themes = Object.keys(themeMap).map(name => {
+        const series = themeMap[name] || [];
+        const win = L ? winSum(series, a, b) : 0;
+        const g = mom3(series, 200);
+        return { name, count: win, growth: g.growth };
+      }).filter(x => x.count > 0)
+        .sort((x, y) => (y.growth || 0) - (x.growth || 0) || y.count - x.count)
+        .slice(0, 5)
+        .map(x => ({ name: shortName(x.name, 18), count: x.count, growth: x.growth }));
+      const surges = ents.filter(isAlert)
+        .sort((x, y) => (y.z || 0) - (x.z || 0))
+        .slice(0, 4)
+        .map(e => ({ name: shortName(e.name, 14), growth: e.growth, z: e.z || 0 }));
+      kgInsight.value = { when, themes, surges };
+
       // 4) 初始位置种子：类别靠内、词次之、企业在外
       nodes.forEach((n, i) => {
         const r = n.type === 'cat' ? 0.5 : n.type === 'ent' ? 1.55 : 1.0;
-        const a = i * 2.399 + 0.4;
-        n.seed = [Math.cos(a) * r, (i % 5 - 2) * 0.42, Math.sin(a) * r];
+        const ang = i * 2.399 + 0.4;
+        n.seed = [Math.cos(ang) * r, (i % 5 - 2) * 0.42, Math.sin(ang) * r];
       });
       return { nodes, links };
     }
@@ -4557,7 +5229,10 @@ const app = createApp({
       if (!stage) return;
       const biz = textaiBiz.value;
       const wf = curWordFreq.value || [];
-      const sig = [theme.value, biz, wf.length, wf[0] && wf[0].word].join('|');
+      const sc = scatterSamples.value;
+      const sig = [theme.value, biz, wf.length, wf[0] && wf[0].word,
+        scColor.value, scSamples.value ? 1 : 0,
+        (sc && sc[biz] && sc[biz].total) || 0, (sc && sc.generated_at) || ''].join('|');
       if (_scenes3d.scatter && _scenes3d.scatter.sig === sig) return;
       disposeScene3d('scatter');
       const token = s3dNewToken('scatter');
@@ -4580,7 +5255,7 @@ const app = createApp({
       const { w, h } = sceneSize(stage);
       stage.querySelectorAll('canvas').forEach(c => c.remove());
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setPixelRatio(Math.min(smallScreen() ? 1.5 : 2, window.devicePixelRatio || 1));
+      renderer.setPixelRatio(Math.min(smallScreen() ? 1.25 : 1.6, window.devicePixelRatio || 1));
       renderer.setSize(w, h);
       stage.appendChild(renderer.domElement);
       const scene = new THREE.Scene();
@@ -4625,11 +5300,23 @@ const app = createApp({
           size: 0.035 + Math.sqrt(x.freq / maxFreq) * 0.068,
         };
       });
+      // 着色模式：类别色板（默认）/ Kmeans 聚类色板
+      const kmOn = scColor.value === 'kmeans';
+      const KM_K = smallScreen() ? 3 : 4;
+      const km = kmOn ? kmeans3d(points.map(p => [p.pos.x, p.pos.y, p.pos.z]), KM_K) : { labels: [], counts: [] };
+      const kmPal = (TC().wordPalette || []).slice(0, KM_K);
+      points.forEach((p, i) => {
+        p.cluster = kmOn ? km.labels[i] : -1;
+        p.color = kmOn ? kmPal[p.cluster % kmPal.length] : wordCatColor(p.cat);
+      });
+      scKmeans.value = kmOn
+        ? kmPal.map((c, i) => ({ name: '簇 ' + (i + 1), color: c, count: km.counts[i] || 0 }))
+        : [];
       const geo = new THREE.SphereGeometry(1, 14, 10);
       const meshes = [];
       points.forEach(p => {
         const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-          color: wordCatColor(p.cat), transparent: true, opacity: .92 }));
+          color: p.color, transparent: true, opacity: .92 }));
         m.position.copy(p.pos);
         m.scale.setScalar(p.size);
         m.userData = p;
@@ -4652,7 +5339,7 @@ const app = createApp({
       const gCol = new Float32Array(points.length * 3);
       points.forEach((p, i) => {
         gPos[i * 3] = p.pos.x; gPos[i * 3 + 1] = p.pos.y; gPos[i * 3 + 2] = p.pos.z;
-        const col = new THREE.Color(wordCatColor(p.cat));
+        const col = new THREE.Color(p.color);
         gCol[i * 3] = col.r; gCol[i * 3 + 1] = col.g; gCol[i * 3 + 2] = col.b;
       });
       const glowGeo = new THREE.BufferGeometry();
@@ -4663,12 +5350,36 @@ const app = createApp({
         opacity: .5, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
       group.add(glowPts);
 
+      // 样本投影：单条投诉文本（TF-IDF + SVD）叠加；红色 = 离群 / 难分类
+      const sampData = (scSamples.value && scatterSamples.value && scatterSamples.value[biz]) || null;
+      const sampleObjs = [];
+      if (sampData && sampData.samples && sampData.samples.length) {
+        const mk = (arr, color, size) => {
+          if (!arr.length) return null;
+          const pos = new Float32Array(arr.length * 3);
+          arr.forEach((s, i) => { pos[i * 3] = s.x; pos[i * 3 + 1] = s.y; pos[i * 3 + 2] = s.z; });
+          const g = new THREE.BufferGeometry();
+          g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+          const obj = new THREE.Points(g, new THREE.PointsMaterial({
+            color: color, size: size, transparent: true, opacity: .42,
+            depthWrite: false, sizeAttenuation: true }));
+          obj.userData.samples = arr;
+          group.add(obj);
+          return obj;
+        };
+        const normal = mk(sampData.samples.filter(s => !s.o), TC().legend, smallScreen() ? .05 : .062);
+        const out = mk(sampData.samples.filter(s => s.o), TC().no, smallScreen() ? .07 : .085);
+        [normal, out].forEach(o => { if (o) sampleObjs.push(o); });
+      }
+
       const rec = { renderer, scene, camera, canvas: renderer.domElement,
         cleanups: [], w, h, raf: 0, sig: '' };
       _scenes3d.scatter = rec;
+      scSelect.value = null;
 
       const tipBox = document.getElementById('scatter3d-tip');
       const raycaster = new THREE.Raycaster();
+      raycaster.params.Points.threshold = 0.05;
       const ndc = new THREE.Vector2();
       const pick = e => {
         const r = stage.getBoundingClientRect();
@@ -4676,37 +5387,138 @@ const app = createApp({
         ndc.y = -((e.clientY - r.top) / Math.max(1, r.height)) * 2 + 1;
         raycaster.setFromCamera(ndc, camera);
         const hit = raycaster.intersectObjects(meshes, false)[0];
-        return hit ? hit.object.userData : null;
+        if (hit) return { kind: 'word', p: hit.object.userData };
+        const sh = raycaster.intersectObjects(sampleObjs, false)[0];
+        if (sh && sh.index != null) {
+          const s = sh.object.userData.samples[sh.index];
+          if (s) return { kind: 'sample', p: s };
+        }
+        return null;
       };
-      const showTip = (p, e) => {
-        if (!p || !tipBox) return;
+      const showTip = (hit, e) => {
+        if (!hit || !tipBox) return;
         const r = stage.getBoundingClientRect();
-        tipBox.innerHTML = '<b>' + p.word + '</b> · ' + p.cat.name
-          + '<br/>词频：<b>' + fmt(p.freq) + '</b><br/>词长：' + p.len + ' 字符'
-          + '<br/><span style="color:' + TC().axisLabel + '">点击 → 用该词 AI 推理</span>';
+        const t = TC();
+        if (hit.kind === 'sample') {
+          const s = hit.p;
+          tipBox.innerHTML = '<b>投诉样本</b> · ' + (s.cat || '未知类别') + (s.st ? ' · ' + s.st : '')
+            + '<div style="max-width:250px;white-space:normal;line-height:1.5;margin-top:3px;color:' + t.legend + '">'
+            + (s.t || '') + '</div>'
+            + (s.o ? '<br/><span style="color:' + t.no + '">离群点 · 距簇心最远，难分类样本</span>'
+              : '<br/><span style="color:' + t.axisLabel + '">投影坐标 = TF-IDF + SVD 前 3 主成分</span>');
+        } else {
+          const p = hit.p;
+          tipBox.innerHTML = '<b>' + p.word + '</b> · ' + p.cat.name
+            + (kmOn ? ' · 簇 ' + (p.cluster + 1) : '')
+            + '<br/>词频：<b>' + fmt(p.freq) + '</b><br/>词长：' + p.len + ' 字符'
+            + '<br/><span style="color:' + t.axisLabel + '">点击 → 用该词 AI 推理</span>';
+        }
         tipBox.style.left = (e.clientX - r.left) + 'px';
         tipBox.style.top = (e.clientY - r.top) + 'px';
         tipBox.style.opacity = '1';
       };
       const hideTip = () => { if (tipBox) tipBox.style.opacity = '0'; };
       let hoverPt = null;
-      const setFocus = p => {
+      const setFocus = hit => {
+        const p = hit && hit.kind === 'word' ? hit.p : null;
         if (p === hoverPt) return;
         hoverPt = p;
         meshes.forEach(m => {
-          const same = !p || m.userData.cat.key === p.cat.key;
+          const same = !p || m.userData.cat.key === p.cat.key || (kmOn && m.userData.cluster === p.cluster);
           m.material.opacity = p ? (same ? 1 : .2) : .92;
         });
         glowPts.material.opacity = p ? .85 : .5;
       };
+
+      // —— 框选：拖出矩形 → 选中词 → 在抽样投影里按词匹配投诉样本 ——
+      let boxMode = scBox.value;
+      let boxEl = null, bx0 = 0, by0 = 0, drawing = false;
+      rec.setBoxMode = v => {
+        boxMode = !!v;
+        renderer.domElement.style.cursor = boxMode ? 'crosshair' : 'grab';
+      };
+      rec.dragBlocked = () => boxMode;
+      const projV = new THREE.Vector3();
+      const toScreenPos = (pos, sw, sh) => {
+        projV.copy(pos).applyMatrix4(group.matrixWorld).project(camera);
+        return { x: (projV.x * .5 + .5) * sw, y: (-projV.y * .5 + .5) * sh, z: projV.z };
+      };
+      const applyBox = (x1, y1, x2, y2) => {
+        group.updateMatrixWorld();
+        const sw = stage.clientWidth, sh = stage.clientHeight;
+        const selIdx = [];
+        points.forEach((p, i) => {
+          const s = toScreenPos(meshes[i].position, sw, sh);
+          if (s.z > -1 && s.z < 1 && s.x >= x1 && s.x <= x2 && s.y >= y1 && s.y <= y2) selIdx.push(i);
+        });
+        const words = selIdx.map(i => points[i].word).slice(0, 12);
+        const selSet = new Set(words);
+        const ss = (sampData && sampData.samples) || [];
+        const hits = selSet.size ? ss.filter(s => {
+          const hay = ((s.tok || '') + ' ' + (s.t || '')).toLowerCase();
+          for (const w of selSet) if (hay.indexOf(w) >= 0) return true;
+          return false;
+        }) : [];
+        scSelect.value = words.length
+          ? { words: words, total: hits.length, samples: hits.slice(0, 5) }
+          : null;
+        const on = new Set(selIdx);
+        meshes.forEach((m, i) => {
+          m.material.opacity = on.has(i) ? 1 : .2;
+          m.scale.setScalar(points[i].size * (on.has(i) ? 1.35 : 1));
+        });
+        glowPts.material.opacity = .25;
+      };
+      rec.clearSel = () => {
+        scSelect.value = null;
+        meshes.forEach((m, i) => { m.material.opacity = .92; m.scale.setScalar(points[i].size); });
+        glowPts.material.opacity = .5;
+        if (boxEl) boxEl.style.display = 'none';
+      };
+      const startBox = e => {
+        const r = stage.getBoundingClientRect();
+        bx0 = e.clientX - r.left; by0 = e.clientY - r.top;
+        drawing = true;
+        if (!boxEl) { boxEl = document.createElement('div'); boxEl.className = 'sc-boxrect'; stage.appendChild(boxEl); }
+        boxEl.style.display = 'block';
+        boxEl.style.left = bx0 + 'px'; boxEl.style.top = by0 + 'px';
+        boxEl.style.width = '0px'; boxEl.style.height = '0px';
+      };
+      const moveBox = e => {
+        if (!drawing) return;
+        const r = stage.getBoundingClientRect();
+        const x = e.clientX - r.left, y = e.clientY - r.top;
+        boxEl.style.left = Math.min(x, bx0) + 'px';
+        boxEl.style.top = Math.min(y, by0) + 'px';
+        boxEl.style.width = Math.abs(x - bx0) + 'px';
+        boxEl.style.height = Math.abs(y - by0) + 'px';
+      };
+      const endBox = e => {
+        if (!drawing) return;
+        drawing = false;
+        if (boxEl) boxEl.style.display = 'none';
+        const r = stage.getBoundingClientRect();
+        const x1 = Math.min(bx0, e.clientX - r.left), x2 = Math.max(bx0, e.clientX - r.left);
+        const y1 = Math.min(by0, e.clientY - r.top), y2 = Math.max(by0, e.clientY - r.top);
+        if (x2 - x1 < 6 || y2 - y1 < 6) return;
+        applyBox(x1, y1, x2, y2);
+      };
+
       let downX = 0, downY = 0;
-      const onMove = e => { const p = pick(e); setFocus(p); if (p) showTip(p, e); else hideTip(); };
+      const onMove = e => {
+        if (boxMode) { moveBox(e); return; }
+        const hit = pick(e); setFocus(hit); if (hit) showTip(hit, e); else hideTip();
+      };
       const onLeave = () => { setFocus(null); hideTip(); };
-      const onDown = e => { downX = e.clientX; downY = e.clientY; };
+      const onDown = e => {
+        downX = e.clientX; downY = e.clientY;
+        if (boxMode) { e.preventDefault(); startBox(e); }
+      };
       const onUp = e => {
+        if (boxMode) { endBox(e); return; }
         if (Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY) > 8) return;
-        const p = pick(e);
-        if (p && p.word) gotoAIKeyword(p.word, biz);
+        const hit = pick(e);
+        if (hit && hit.kind === 'word') gotoAIKeyword(hit.p.word, biz);
       };
       renderer.domElement.addEventListener('pointermove', onMove);
       renderer.domElement.addEventListener('pointerleave', onLeave);
@@ -4717,14 +5529,16 @@ const app = createApp({
         renderer.domElement.removeEventListener('pointerleave', onLeave);
         renderer.domElement.removeEventListener('pointerdown', onDown);
         renderer.domElement.removeEventListener('pointerup', onUp);
+        if (boxEl) boxEl.remove();
       });
       sceneDragRotate(rec, group, { xLimit: 1.3 });
+      rec.setBoxMode(scBox.value);
       sceneResizeHook(rec, stage);
 
       const t0 = performance.now();
       const animate = () => {
         rec.raf = requestAnimationFrame(animate);
-        if (document.hidden) return;
+        if (!s3dDrawable(stage)) return;
         const now = performance.now();
         const tt = now / 1000;
         // 散点缓慢漂浮，光斑同步更新
@@ -4834,7 +5648,7 @@ const app = createApp({
       const clock = new THREE.Clock();
       const animate = () => {
         rec.raf = requestAnimationFrame(animate);
-        if (document.hidden) return;
+        if (!s3dDrawable(stage)) return;
         const t0 = clock.getElapsedTime();
         for (let i = 0; i < N; i++) {
           pos[i * 3] += speed[i];
@@ -4861,6 +5675,39 @@ const app = createApp({
     const kgDrill = () => {
       if (!kgSel.value) return;
       drillToQuery(textaiBiz.value, { keyword: kgSel.value.word || kgSel.value.name });
+    };
+    // 时间切片 / 节点筛选：改状态后重建图谱（sig 命中时不重复构建）
+    const reloadKg = () => { initKnowledge3D(); };
+    const setKgWin = w => {
+      if (kgWin.value === w) return;
+      kgWin.value = w;
+      initKnowledge3D();
+    };
+    const setKgRisk = v => {
+      const val = !!v;
+      if (kgRiskOnly.value === val) return;
+      kgRiskOnly.value = val;
+      initKnowledge3D();
+    };
+    // 散点工具条：Kmeans 着色 / 样本投影开关 / 框选模式
+    const setScColor = m => {
+      if (scColor.value === m) return;
+      scColor.value = m;
+      initScatter3D();
+    };
+    const toggleScSamples = () => {
+      scSamples.value = !scSamples.value;
+      initScatter3D();
+    };
+    const toggleScBox = () => {
+      scBox.value = !scBox.value;
+      const s = _scenes3d.scatter;
+      if (s && s.setBoxMode) s.setBoxMode(scBox.value);
+    };
+    const clearScSel = () => {
+      scSelect.value = null;
+      const s = _scenes3d.scatter;
+      if (s && s.clearSel) s.clearSel();
     };
 
     // ========= 查询中心 =========
@@ -5381,13 +6228,15 @@ const app = createApp({
           if (keys.length && !qStats.table) { qStats.table = keys[0]; loadStats(); }
         });
 
-      // ---- 首屏关键路径：驾驶舱 + 词频 + 数据源元信息 ----
-      const [ov, wf, ds] = await Promise.all([
+      // ---- 首屏关键路径：驾驶舱 + 词频 + 数据源元信息 + 地球时序预聚合 ----
+      const [ov, wf, ds, geo] = await Promise.all([
         safeGet('/api/dashboard/overview', null),
         safeGet('/api/textanalysis/wordfreq?limit=100', { data:[] }),
         safeGet('/api/detail/datasets', {}),
+        safeGet('/api/dashboard/geo-detail', null),
       ]);
       if (ov) { overview.value = ov; health.ok = true; health.lastAt = Date.now(); }
+      if (geo && geo.months) geoDetail.value = geo;
       if (wf && wf.data) { wordFreq.value = wf.data; textaiDataMap.cfpb.wordFreq = wf.data; textaiDataMap.cfpb.loaded = true; }
       if (ds) datasetsMeta.value = ds;
 
@@ -5401,13 +6250,29 @@ const app = createApp({
       nextTick(() => { renderCharts('dashboard'); setTimeout(resizeAllCharts, 300); });
       tryRender('textai');   // 直接以 ?page=textai 进入时补渲染
 
-      // 地图注册放最后，完全不阻塞首屏；成功且当前在州图页则重绘为地图
+      // 地图注册放最后，完全不阻塞首屏；成功且当前在州图页则增量补绘地图（不销毁实例）
       registerUsaMap().then(ok => {
         if (ok && ['dashboard','finance','telecom'].includes(activePage.value)) {
-          disposeAllCharts();
           renderCharts(activePage.value);
         }
       });
+
+      // 知识图谱 / 散点样本只在文本 AI 页用到（样本 JSON 1.1MB），不占首屏关键路径
+      const warmSecondary = () => {
+        Promise.all([
+          kgDetail.value ? null : safeGet('/api/dashboard/kg-detail', null),
+          scatterSamples.value ? null : safeGet('/api/dashboard/scatter-samples', null),
+        ]).then(([kg2, sc2]) => {
+          let dirty = false;
+          if (kg2 && kg2.months) { kgDetail.value = kg2; dirty = true; }
+          if (sc2 && sc2.cfpb) { scatterSamples.value = sc2; dirty = true; }
+          if (dirty && activePage.value === 'textai') tryRender('textai');
+        });
+      };
+      _warmSecondary = warmSecondary;
+      if (activePage.value === 'textai') warmSecondary();
+      else if (window.requestIdleCallback) requestIdleCallback(warmSecondary, { timeout: 3000 });
+      else setTimeout(warmSecondary, 1200);
     }
 
     // ========= 查询中心逻辑 =========
@@ -6812,6 +7677,10 @@ const app = createApp({
       doDetailSearch, resetDetailQ, exportDetail, openDetail, drillToQuery,
       // 3D 知识图谱右侧联动
       kgSel, kgPickRelated, kgAiPredict, kgDrill,
+      kgWin, kgMinCount, kgRiskOnly, kgInsight, setKgWin, setKgRisk, reloadKg,
+      // 3D 散点：Kmeans / 样本投影 / 框选
+      scColor, scSamples, scBox, scSelect, scKmeans, scProjSamples,
+      setScColor, toggleScSamples, toggleScBox, clearScSel,
       // 集群控制台
       cluster, clusterLogRef, stateLabel, duration, clusterTest, clusterToggle,
       clusterRun, clusterKill, clusterOpenLog, clusterPreview, clusterResetPaths,

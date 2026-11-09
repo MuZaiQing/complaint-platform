@@ -357,6 +357,12 @@ def _finish(run: dict, state: str, error: Optional[str] = None) -> None:
                          ("run_id", "id", "name", "state", "phase", "started", "ended",
                           "import_state", "rows_imported", "probe", "output")})
     save_history(_history)
+    # 入库后清掉统计表缓存，大屏立即反映新数据（否则最多滞后一个 TTL）
+    try:
+        from db_meta import clear_table_cache
+        clear_table_cache()
+    except Exception:
+        pass
 
 
 def _ensure_jar(job: dict) -> str:

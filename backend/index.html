@@ -326,6 +326,22 @@
   .mb-16 { margin-bottom: 16px; }
   .full { height: 100%; }
 
+  /* 方案 C：紧凑图表容器（顶部三列行专用，约 130px 高） */
+  .chart.chart-compact { min-height: 128px; max-height: 140px; height: 128px; }
+  /* 方案 C：管道极简卡（5 行图标列表 + 展开按钮，默认不占整行） */
+  .pipe-mini .card-title { display:flex; align-items:center; gap:8px; }
+  .pipe-mini .btn-link { margin-left:auto; padding:0 6px; font-size:11px; color: var(--cyan);
+    background: var(--cyan-dim); border: 1px solid rgba(0,216,255,.28); border-radius: 4px;
+    cursor: pointer; font-weight:500; transition: background .16s; }
+  .pipe-mini .btn-link:hover { background: rgba(0,216,255,.22); }
+  .pipe-mini-list { display: flex; flex-direction: column; gap: 4px; }
+  .pipe-mini-row { display: grid; grid-template-columns: 22px 64px 1fr; gap: 6px; align-items:center;
+    padding: 4px 6px; font-size: 11px; border-radius: 4px; color: var(--fg-1); }
+  .pipe-mini-row:nth-child(odd) { background: rgba(255,255,255,.03); }
+  .pipe-mini-row b { color: var(--fg-0); font-weight: 600; font-size: 11px; }
+  .pipe-mini-row .pipe-desc { color: var(--fg-3); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pipe-mini-row .pipe-ico { font-size: 14px; text-align:center; }
+
   /* Element Plus 主题适配（变量随主题自动翻转） */
   .el-table { --el-table-bg-color: transparent; --el-table-tr-bg-color: transparent;
     --el-table-header-bg-color: var(--bg-3); --el-table-row-hover-bg-color: var(--cyan-dim);
@@ -1670,7 +1686,47 @@
           <div class="deck-hint">拖拽 / 滑动手势切换 · 点击卡片置顶 · 悬停暂停</div>
         </div>
 
-        <!-- 3D 地球总览：CFPB 蓝色光柱 / FCC 绿色光柱，柱高 = 州投诉量（可随时间轴播放） -->
+        <!-- ② 三列行：趋势 + TOP10 + 管道极简（方案 C：3D 地球下移，这里腾出整行给更紧凑的概览） -->
+        <div class="grid-3 mb-16">
+          <!-- ③ 双业务月度趋势（砍高到 ~130px，X 轴字号 10，图例右上角） -->
+          <div class="card">
+            <div class="card-title">双业务月度投诉趋势对比</div>
+            <div class="chart chart-compact" data-chart-key="refDashTrend"></div>
+          </div>
+          <!-- ④ 高频词 TOP10 -->
+          <div class="card">
+            <div class="card-title">投诉高频词 TOP10</div>
+            <div class="chart chart-compact" data-chart-key="refDashWord"></div>
+          </div>
+          <!-- ⑨ 管道极简图标（默认收起成 5 行图标，点「完整架构」展开原粒子） -->
+          <div class="card pipe-mini">
+            <div class="card-title">平台数据链路 · 五层架构
+              <button class="btn-link" id="pipe-expand" type="button" @click="pipeExpanded = !pipeExpanded">
+                {{ pipeExpanded ? '收起' : '完整架构 →' }}
+              </button>
+            </div>
+            <div class="pipe-mini-list">
+              <div class="pipe-mini-row"><span class="pipe-ico">📄</span><b>原始数据</b><span class="pipe-desc">CCDB / FCC 工单</span></div>
+              <div class="pipe-mini-row"><span class="pipe-ico">🗂</span><b>HDFS</b><span class="pipe-desc">分布式存储</span></div>
+              <div class="pipe-mini-row"><span class="pipe-ico">⚙️</span><b>MapReduce</b><span class="pipe-desc">分词·词频·聚合</span></div>
+              <div class="pipe-mini-row"><span class="pipe-ico">🗄</span><b>MySQL</b><span class="pipe-desc">10 张预聚合表</span></div>
+              <div class="pipe-mini-row"><span class="pipe-ico">🖥</span><b>前端大屏</b><span class="pipe-desc">单文件 HTML + ECharts</span></div>
+            </div>
+            <!-- 展开后：原粒子动画（默认隐藏，点上面按钮才显示） -->
+            <div v-if="pipeExpanded">
+              <div class="pipe-stage" id="pipe-stage"></div>
+              <div class="pipe-labels">
+                <span><b>原始数据</b>CCDB / FCC 原始工单</span>
+                <span><b>HDFS</b>分布式存储</span>
+                <span><b>MapReduce</b>分词 / 词频 / 聚合</span>
+                <span><b>MySQL</b>10 张统计表</span>
+                <span><b>前端大屏</b>Vue3 + ECharts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ① 3D 地球总览（方案 C：下移到第二行，保持完整高度仍是视觉中心） -->
         <div class="card mb-16">
           <div class="card-title">美国投诉地理总览 · 3D 地球
             <span class="hint-tag">光柱高度 = 州投诉量 · 时间轴播放 · 拖拽旋转 · 点击柱体下钻</span>
@@ -1715,19 +1771,6 @@
 
         </div>
 
-        <div class="grid-2 mb-16" style="grid-template-columns: 2fr 1fr;">
-          <!-- 双业务月度趋势 -->
-          <div class="card">
-            <div class="card-title">双业务月度投诉趋势对比</div>
-            <div class="chart" data-chart-key="refDashTrend"></div>
-          </div>
-          <!-- 高频词预览 -->
-          <div class="card">
-            <div class="card-title">投诉高频词 TOP10</div>
-            <div class="chart" data-chart-key="refDashWord"></div>
-          </div>
-        </div>
-
         <div class="grid-2 mb-16">
           <!-- 企业 TOP5 -->
           <div class="card">
@@ -1764,18 +1807,7 @@
           </div>
         </div>
 
-        <!-- 五层架构数据流管道（轻量粒子，示意数据流转） -->
-        <div class="card" style="margin-top:16px;">
-          <div class="card-title">平台数据链路 · 五层架构<span class="hint-tag">粒子示意数据流转</span></div>
-          <div class="pipe-stage" id="pipe-stage"></div>
-          <div class="pipe-labels">
-            <span><b>原始数据</b>CCDB / FCC 原始工单</span>
-            <span><b>HDFS</b>分布式存储</span>
-            <span><b>MapReduce</b>分词 / 词频 / 聚合</span>
-            <span><b>MySQL</b>10 张统计表</span>
-            <span><b>前端大屏</b>Vue3 + ECharts</span>
-          </div>
-        </div>
+        <!-- 五层架构管道：默认极简图标，点按钮展开粒子；这里不再独立占行 -->
       </div>
 
       <!-- ============================================= -->
@@ -3497,6 +3529,7 @@ const app = createApp({
     // ========= 指标卡扇形卡堆 =========
     const deckIdx = ref(0);
     const deckHover = ref(false);
+    const pipeExpanded = ref(false);   // 方案 C：⑨ 管道极简卡的展开状态（true 时显示原粒子动画）
     const deckN = computed(() => dashboardCards.value.length || 6);
     const deckFront = computed(() => deckIdx.value);
     // 深度 d：0 = 焦点卡（最上层、全高），d 越大越靠后、越靠下
@@ -6723,6 +6756,8 @@ const app = createApp({
         const c = echartsInit('[data-chart-key="refDashTrend"]');
         baseTheme(c);
         c.setOption({
+          // 方案 C：图表缩到 ~130px 高，grid 紧一点、图例右上角
+          grid: { left: 42, right: 14, top: 30, bottom: 22, containLabel: false },
           // tooltip 统一补充环比：看图即可读出增长/回落，减少口头解释
           tooltip: { trigger: 'axis', formatter: ps => {
             const i = ps[0].dataIndex, row = overview.value.trend[i];
@@ -6735,13 +6770,13 @@ const app = createApp({
             };
             return `<b>${row.month}</b><br/>` + lineHtml(ps[0], 'fin') + (ps[1] ? '<br/>' + lineHtml(ps[1], 'fcc') : '');
           } },
-          legend: { textStyle:{color:TC().legend}, top: 8 },
+          legend: { textStyle:{color:TC().legend, fontSize:10}, right: 4, top: 4, itemWidth: 14, itemHeight: 8 },
           xAxis: { type:'category', data: overview.value.trend.map(t=>t.month),
-            axisLabel:{color:TC().axisLabel, rotate:45, hideOverlap:true,
-              // 36 个月全量显示会挤成一团：按约 10 个刻度抽稀
-              interval: Math.max(0, Math.ceil(overview.value.trend.length / 10) - 1)},
+            axisLabel:{color:TC().axisLabel, fontSize:10, rotate:45, hideOverlap:true,
+              // 36 个月全量显示会挤成一团：按约 8 个刻度抽稀（方案 C 高度砍了，再紧一点）
+              interval: Math.max(0, Math.ceil(overview.value.trend.length / 8) - 1)},
             axisLine:{lineStyle:{color:TC().axis}} },
-          yAxis: { type:'value', axisLabel:{color:TC().axisLabel}, splitLine:{lineStyle:{color:TC().split, type:'dashed'}} },
+          yAxis: { type:'value', axisLabel:{color:TC().axisLabel, fontSize:10}, splitLine:{lineStyle:{color:TC().split, type:'dashed'}} },
           series: [
             { name:'金融投诉', type:'line', smooth:true, symbol:'circle', symbolSize:7, showSymbol:false,
               data: overview.value.trend.map(t=>t.fin),
@@ -6782,7 +6817,8 @@ const app = createApp({
         baseTheme(c);
         const top10 = wordFreq.value.slice(0,10);
         c.setOption({
-          grid: { left: 120, right: 30, top: 20, bottom: 20 },
+          // 方案 C：压缩高度，Y 轴文字缩进稍微收一点
+          grid: { left: 116, right: 30, top: 14, bottom: 14 },
           xAxis: { type:'value', splitNumber:3,
             axisLabel:{color:TC().axisLabel, formatter: fmt, hideOverlap:true},
             splitLine:{lineStyle:{color:TC().split, type:'dashed'}} },

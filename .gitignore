@@ -17,3 +17,5 @@ backend/logs/
 backend/.cluster_logs/
 __pycache__/
 *.log
+
+.superpowers/

@@ -289,9 +289,10 @@
   .metric-card .label { font-size: 11px; color: var(--fg-2); letter-spacing: 1px;
     line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
   .metric-card .value {
-    font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(19px, 1.45vw, 28px); font-weight: 700;
     color: var(--fg-0); margin-top: 6px; letter-spacing: 1px;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .metric-card.accent-cyan  .value { color: var(--cyan); }
   .metric-card.accent-green .value { color: var(--green); }
@@ -338,8 +339,8 @@
   .grid-2.ratio-wide { grid-template-columns: 7fr 3fr; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; min-width: 0; }
   .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; min-width: 0; }
-  /* 指标区混排：首卡更宽，破掉等分带来的模板感 */
-  .grid-4.mix { grid-template-columns: minmax(0, 1.55fr) repeat(3, minmax(0, 1fr)); }
+  /* 指标区混排：首卡略宽，破掉等分带来的模板感（比例控制在 1.4，避免其余卡被挤到换行） */
+  .grid-4.mix { grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); }
   .grid-6 { display: grid; grid-template-columns: repeat(6, minmax(160px, 1fr)); gap: 14px; min-width: 0; }
   .mb-16 { margin-bottom: 16px; }
   .full { height: 100%; }
@@ -2887,6 +2888,7 @@ window._scenes3d = _scenes3d;
 function disposeScene3d(key) {
   const s = _scenes3d[key];
   if (!s) return;
+  s.dead = true;              // 标记已销毁，残留帧在 animate 里立即退出
   delete _scenes3d[key];
   cancelAnimationFrame(s.raf);
   (s.cleanups || []).forEach(fn => { try { fn(); } catch (e) {} });
@@ -4719,6 +4721,7 @@ const app = createApp({
       };
 
       const animate = () => {
+        if (rec.dead) return;
         rec.raf = requestAnimationFrame(animate);
         if (!s3dDrawable(stage)) return;
         const now = performance.now();
@@ -5141,6 +5144,7 @@ const app = createApp({
       const tmpV = new THREE.Vector3();
       const tmpDir = new THREE.Vector3();
       const animate = () => {
+        if (rec.dead) return;
         rec.raf = requestAnimationFrame(animate);
         if (!s3dDrawable(stage)) return;
         // 布局已由 d3-force-3d 离线收敛，动画期只做旋转与流光，不再逐步求解
@@ -5646,6 +5650,7 @@ const app = createApp({
 
       const t0 = performance.now();
       const animate = () => {
+        if (rec.dead) return;
         rec.raf = requestAnimationFrame(animate);
         if (!s3dDrawable(stage)) return;
         const now = performance.now();
@@ -5756,6 +5761,7 @@ const app = createApp({
 
       const clock = new THREE.Clock();
       const animate = () => {
+        if (rec.dead) return;
         rec.raf = requestAnimationFrame(animate);
         if (!s3dDrawable(stage)) return;
         const t0 = clock.getElapsedTime();

@@ -37,17 +37,19 @@
   }
   /* ========= 设计令牌（默认：暗夜霓虹 · 深色） ========= */
   :root {
-    --bg-0: #0B0C10;
-    --bg-1: #101216;
-    --bg-2: #15181D;
-    --bg-3: #1C2026;
-    --border: rgba(255,255,255,.08);
-    --fg-0: #EDEDEF;
-    --fg-1: #9BA1AD;
+    --bg-0: #0B0E13;
+    --bg-1: #0F131A;
+    --bg-2: #11151C;
+    --bg-3: #171C24;
+    --border: rgba(148,163,184,.14);
+    --fg-0: #E6E8EB;
+    --fg-1: #9AA3AE;
     --fg-2: #6B7280;
     --fg-3: #4B5159;
     --cyan: #00D8FF;
-    --cyan-dim: rgba(0,216,255,.12);
+    --cyan-dim: rgba(0,216,255,.14);
+    --blue: #60A5FA;
+    --blue-dim: rgba(96,165,250,.14);
     --green: #2DD4A7;
     --green-dim: rgba(45,212,167,.12);
     --red: #F2555A;
@@ -56,7 +58,7 @@
     --orange-dim: rgba(255,149,51,.12);
     --purple: #A78BFA;
     --purple-dim: rgba(167,139,250,.12);
-    --on-accent: #0B0C10;
+    --on-accent: #0B0E13;
     --card-radius: 12px;
     --shadow-glow: 0 4px 24px rgba(0,0,0,.35);
     --shadow-hover: 0 8px 28px rgba(0,0,0,.5);
@@ -90,33 +92,35 @@
     --el-text-color-regular: var(--fg-1);
     --el-text-color-secondary: var(--fg-2);
   }
-  /* ========= 奶油学术（浅色 · FT 编辑风） ========= */
+  /* ========= 玻璃拟态白（浅色 · 蓝玻璃） ========= */
   html[data-theme="light"] {
-    --bg-0: #F6F1E6;
-    --bg-1: #FBF8F0;
-    --bg-2: #FFFDF8;
-    --bg-3: #F1EADA;
-    --border: #E4DCCB;
-    --fg-0: #22304A;
-    --fg-1: #4A5A75;
-    --fg-2: #7C879C;
-    --fg-3: #A6AEBD;
-    --cyan: #0F4C81;
-    --cyan-dim: rgba(15,76,129,.08);
-    --green: #2F9E6E;
-    --green-dim: rgba(47,158,110,.10);
-    --red: #D64545;
-    --red-dim: rgba(214,69,69,.10);
-    --orange: #E8552D;
-    --orange-dim: rgba(232,85,45,.10);
-    --purple: #7C6BD9;
-    --purple-dim: rgba(124,107,217,.08);
+    --bg-0: #EEF2F7;
+    --bg-1: #F6F9FD;
+    --bg-2: rgba(255,255,255,.72);
+    --bg-3: #E4EAF2;
+    --border: rgba(37,99,235,.12);
+    --fg-0: #1E293B;
+    --fg-1: #475569;
+    --fg-2: #94A3B8;
+    --fg-3: #CBD5E1;
+    --cyan: #2563EB;
+    --cyan-dim: rgba(37,99,235,.10);
+    --blue: #06B6D4;
+    --blue-dim: rgba(6,182,212,.12);
+    --green: #059669;
+    --green-dim: rgba(5,150,105,.10);
+    --red: #DC2626;
+    --red-dim: rgba(220,38,38,.10);
+    --orange: #D97706;
+    --orange-dim: rgba(217,119,6,.10);
+    --purple: #8B5CF6;
+    --purple-dim: rgba(139,92,246,.10);
     --on-accent: #FFFFFF;
-    --shadow-glow: 0 1px 3px rgba(34,48,74,.06), 0 6px 20px rgba(34,48,74,.05);
-    --shadow-hover: 0 8px 28px rgba(34,48,74,.12);
-    --fin-top1: #0F4C81; --fin-top23: #4A7FD1; --fin-normal: #A8C3DC;
-    --fcc-top1: #E8552D; --fcc-top23: #F08A5D; --fcc-normal: #F0C3AC;
-    --other-gray: #C9C2B4;
+    --shadow-glow: 0 1px 3px rgba(30,41,59,.08), 0 8px 24px rgba(30,41,59,.08);
+    --shadow-hover: 0 12px 32px rgba(30,41,59,.16);
+    --fin-top1: #2563EB; --fin-top23: #60A5FA; --fin-normal: #BFDBFE;
+    --fcc-top1: #F59E0B; --fcc-top23: #FBBF24; --fcc-normal: #FDE68A;
+    --other-gray: #CBD5E1;
   }
   /* 图表结论小卡片 */
   .conclusion {
@@ -271,7 +275,8 @@
   .metric-card.accent-orange { border-color: color-mix(in srgb, var(--orange) 35%, transparent); }
   .metric-card.accent-purple { border-color: color-mix(in srgb, var(--purple) 35%, transparent); }
   .metric-card.accent-red { border-color: color-mix(in srgb, var(--red) 35%, transparent); }
-  .metric-card .label { font-size: 11px; color: var(--fg-2); letter-spacing: 1px; }
+  .metric-card .label { font-size: 11px; color: var(--fg-2); letter-spacing: 1px;
+    line-height: 1.45; white-space: normal; overflow-wrap: anywhere; }
   .metric-card .value {
     font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 700;
     color: var(--fg-0); margin-top: 6px; letter-spacing: 1px;
@@ -1215,7 +1220,7 @@
   }
   @supports not (background: color-mix(in srgb, red, blue)) {
     :root { --card-face: rgba(21,24,29,.9); }
-    html[data-theme="light"] { --card-face: rgba(255,253,248,.94); }
+    html[data-theme="light"] { --card-face: rgba(255,255,255,.94); }
   }
 
   /* ========= 自适应布局：1280 / 1120 / 1023 / 767 / 560 ========= */
@@ -1310,12 +1315,12 @@
     --glass-face: color-mix(in srgb, var(--bg-2) 60%, transparent);
   }
   html[data-theme="light"] {
-    --space-a: #F7F2E7; --space-b: #FBF8F0; --space-c: #F3EEE2;
-    --grid-ink: rgba(15,76,129,.11);
-    --scan-ink: rgba(15,76,129,.09);
-    --holo-line: rgba(15,76,129,.18);
-    --holo-glow: 0 0 14px rgba(15,76,129,.08);
-    --glass-face: rgba(255,253,248,.68);
+    --space-a: #EAF0F8; --space-b: #F5F9FD; --space-c: #E2EAF5;
+    --grid-ink: rgba(37,99,235,.10);
+    --scan-ink: rgba(37,99,235,.08);
+    --holo-line: rgba(37,99,235,.16);
+    --holo-glow: 0 0 14px rgba(37,99,235,.07);
+    --glass-face: rgba(255,255,255,.62);
   }
   body {
     background: linear-gradient(158deg, var(--space-a) 0%, var(--space-b) 44%, var(--space-c) 100%) fixed;
@@ -1466,7 +1471,7 @@
     transform: translateX(-120%); animation: title-sweep .5s var(--ease-out) 1 both;
   }
   html[data-theme="light"] .page-title::after {
-    background: linear-gradient(100deg, transparent 35%, rgba(15,76,129,.14) 50%, transparent 65%);
+    background: linear-gradient(100deg, transparent 35%, rgba(37,99,235,.14) 50%, transparent 65%);
   }
   @keyframes title-sweep { to { transform: translateX(120%); } }
   @media (prefers-reduced-motion: reduce) {
@@ -1530,8 +1535,8 @@
   .cluster-table th { color: var(--fg-2); font-weight: 500; }
   .cluster-table td { color: var(--fg-1); }
 
-  html[data-theme="light"] .cluster-log { background: #f4f0e8; }
-  html[data-theme="light"] .cj-row input { background: #fbf8f2; }
+  html[data-theme="light"] .cluster-log { background: #EEF2F7; }
+  html[data-theme="light"] .cj-row input { background: #F5F9FD; }
   @media (max-width: 900px) {
     .cluster-grid { grid-template-columns: 1fr; }
     .cluster-log { height: 260px; }
@@ -1569,7 +1574,7 @@
   .hist-trend { width: 120px; height: 24px; }
   .preflight-body { font-size: 12px; line-height: 1.9; }
   html[data-theme="light"] .viz-phase { background: rgba(0,0,0,.05); }
-  html[data-theme="light"] .cluster-log-line.is-info { color: #555; }
+  html[data-theme="light"] .cluster-log-line.is-info { color: #475569; }
   @media (max-width: 900px) { .viz-body { flex-wrap: wrap; } .hist-trend { display: none; } }
 </style>
 </head>
@@ -1635,7 +1640,7 @@
         <span class="src-label">数据源：CFPB · FCC</span>
         <span class="stat-chip" v-if="overview">金融 {{ fmt(overview.cards.fin_total) }} / 电信 {{ fmt(overview.cards.fcc_total) }}</span>
         <button class="theme-toggle" @click="toggleTheme"
-                :title="theme === 'dark' ? '切换为浅色（奶油学术）' : '切换为深色（暗夜霓虹）'"
+                :title="theme === 'dark' ? '切换为浅色（玻璃拟态白）' : '切换为深色（暗夜霓虹）'"
                 v-html="theme === 'dark' ? ICONS.sun : ICONS.moon">
         </button>
       </div>
@@ -2986,37 +2991,37 @@ function startRankScroll(c, total, win = 12) {
   }, 500);
 }
 
-// ======= 双主题色板（ECharts 用；dark=暗夜霓虹 / light=奶油学术） =======
+// ======= 双主题色板（ECharts 用；dark=暗夜霓虹 / light=玻璃拟态白） =======
 const THEMES = {
   dark: {
     fin: { top1:'#00D8FF', top23:'#4C8DFF', normal:'#2A5A8C', other:'#555555' },
     fcc: { top1:'#FF9533', top23:'#FFB244', normal:'#774422', other:'#555555' },
     line1:'#00D8FF', line2:'#FF9533',
     yes:'#2DD4A7', no:'#F2555A', purple:'#A78BFA',
-    axis:'#2A2F38', axisLabel:'#6B7280', split:'rgba(255,255,255,.06)', legend:'#9BA1AD',
-    tooltipBg:'#15181D', tooltipBorder:'rgba(255,255,255,.1)', tooltipText:'#EDEDEF',
-    pieBorder:'#101216', onAccent:'#0B0C10',
+    axis:'#232A33', axisLabel:'#6B7280', split:'rgba(148,163,184,.08)', legend:'#9AA3AE',
+    tooltipBg:'#11151C', tooltipBorder:'rgba(148,163,184,.16)', tooltipText:'#E6E8EB',
+    pieBorder:'#0F131A', onAccent:'#0B0E13',
     wordPalette:['#00D8FF','#36D1FF','#2DD4A7','#A78BFA','#FF9533','#5EEAD4','#7DD3FC','#F0ABFC'],
     fccWordPalette:['#FF9533','#FFB244','#FFC966','#F0AB6B','#E0883A','#C77B3A'],
     wordCat:['#00D8FF','#A78BFA','#2DD4A7','#FF9533','#F2555A','#7DD3FC'],
-    mapRange:['#15181D','#123B52','#00D8FF','#A78BFA'],
-    mapRangeFcc:['#15181D','#4A2E18','#FF9533','#FFC966'],
-    mapArea:'#15181D', mapBorder:'#2A2F38',
+    mapRange:['#11151C','#123B52','#00D8FF','#A78BFA'],
+    mapRangeFcc:['#11151C','#4A2E18','#FF9533','#FFC966'],
+    mapArea:'#11151C', mapBorder:'#232A33',
   },
   light: {
-    fin: { top1:'#0F4C81', top23:'#4A7FD1', normal:'#A8C3DC', other:'#C9C2B4' },
-    fcc: { top1:'#E8552D', top23:'#F08A5D', normal:'#F0C3AC', other:'#C9C2B4' },
-    line1:'#0F4C81', line2:'#E8552D',
-    yes:'#2F9E6E', no:'#D64545', purple:'#7C6BD9',
-    axis:'#D8CFBC', axisLabel:'#7C879C', split:'rgba(34,48,74,.08)', legend:'#4A5A75',
-    tooltipBg:'#FFFDF8', tooltipBorder:'#E4DCCB', tooltipText:'#22304A',
-    pieBorder:'#FBF8F0', onAccent:'#FFFFFF',
-    wordPalette:['#0F4C81','#3E7CB1','#2F9E6E','#7C6BD9','#E8552D','#88A8C9','#B58900','#6B8CAE'],
-    fccWordPalette:['#E8552D','#F08A5D','#F4A988','#C9753F','#B5651D','#8B5A2B'],
-    wordCat:['#0F4C81','#7C6BD9','#2F9E6E','#E8552D','#D64545','#88A8C9'],
-    mapRange:['#F1EADA','#A8C3DC','#3E7CB1','#0F4C81'],
-    mapRangeFcc:['#F1EADA','#F0C3AC','#F08A5D','#E8552D'],
-    mapArea:'#F1EADA', mapBorder:'#D8CFBC',
+    fin: { top1:'#2563EB', top23:'#3B82F6', normal:'#93C5FD', other:'#CBD5E1' },
+    fcc: { top1:'#D97706', top23:'#F59E0B', normal:'#FCD34D', other:'#CBD5E1' },
+    line1:'#2563EB', line2:'#D97706',
+    yes:'#059669', no:'#DC2626', purple:'#8B5CF6',
+    axis:'#E4EAF2', axisLabel:'#94A3B8', split:'rgba(30,41,59,.08)', legend:'#475569',
+    tooltipBg:'#FFFFFF', tooltipBorder:'#E4EAF2', tooltipText:'#1E293B',
+    pieBorder:'#FFFFFF', onAccent:'#FFFFFF',
+    wordPalette:['#2563EB','#3B82F6','#059669','#8B5CF6','#D97706','#0891B2','#60A5FA','#0D9488'],
+    fccWordPalette:['#D97706','#B45309','#F59E0B','#92400E','#EA8C00','#A16207'],
+    wordCat:['#2563EB','#8B5CF6','#059669','#D97706','#DC2626','#0891B2'],
+    mapRange:['#E4EAF2','#BFDBFE','#60A5FA','#2563EB'],
+    mapRangeFcc:['#E4EAF2','#FDE68A','#F59E0B','#D97706'],
+    mapArea:'#E4EAF2', mapBorder:'#DCE4F0',
   },
 };
 // ======= 词云语义分类：稳定配色 + 图例（slot 对应 THEMES.wordCat） =======
@@ -3087,7 +3092,7 @@ const ICONS = {
 // ======= App =======
 const app = createApp({
   setup() {
-    // ========= 主题切换（暗夜霓虹 ⇄ 奶油学术） =========
+    // ========= 主题切换（暗夜霓虹 ⇄ 玻璃拟态白） =========
     const theme = ref(localStorage.getItem('theme') === 'light' ? 'light' : 'dark');
     const applyTheme = () => { document.documentElement.dataset.theme = theme.value; };
     applyTheme();
@@ -6823,12 +6828,16 @@ const app = createApp({
             axisLabel:{color:TC().axisLabel, formatter: fmt, hideOverlap:true},
             splitLine:{lineStyle:{color:TC().split, type:'dashed'}} },
           yAxis: { type:'category', data: top10.map(w=>w.word).reverse(),
-            axisLabel:{color:TC().line1, fontFamily:'JetBrains Mono'}, axisLine:{lineStyle:{color:TC().axis}} },
+            axisLabel:{color:TC().line1, fontFamily:'JetBrains Mono', fontSize:9, interval:0},
+            axisLine:{lineStyle:{color:TC().axis}} },
           series: [{ type:'bar', data: top10.map(w=>w.freq).reverse(),
             itemStyle:{ color: barGradH(TC().yes), borderRadius:[0,4,4,0],
               shadowBlur: 8, shadowColor: TC().yes + '44' },
-            barWidth: 14, label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono',
-              formatter: p => fmt(p.value)} }],
+            // 10 行挤在 128px 里，柱宽必须小于行高，否则相邻柱会互相压住
+            barWidth: 7, barCategoryGap: '42%',
+            label:{show:true, position:'right', color:TC().legend, fontSize:9, fontFamily:'JetBrains Mono',
+              formatter: p => fmt(p.value)},
+            labelLayout: { hideOverlap: true } }],
         });
         // 点击高频词 → AI 页自动填词并推理，形成「看词 → 验证模型」的演示闭环
         c.off('click');

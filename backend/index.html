@@ -301,9 +301,9 @@
   .metric-card .suffix { font-size: 12px; color: var(--fg-2); margin-left: 4px; }
   .metric-card .delta { font-size: 11px; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
   .metric-card::after {
-    content: ''; position: absolute; right: -20px; bottom: -20px;
-    width: 80px; height: 80px; border-radius: 50%;
-    opacity: .08;
+    content: ''; position: absolute; right: -24px; bottom: -26px;
+    width: 64px; height: 64px; border-radius: 50%;
+    opacity: .045; filter: blur(1px);
   }
   .metric-card.accent-cyan::after  { background: var(--cyan); }
   .metric-card.accent-green::after { background: var(--green); }
@@ -338,6 +338,8 @@
   .grid-2.ratio-wide { grid-template-columns: 7fr 3fr; }
   .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; min-width: 0; }
   .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; min-width: 0; }
+  /* 指标区混排：首卡更宽，破掉等分带来的模板感 */
+  .grid-4.mix { grid-template-columns: minmax(0, 1.55fr) repeat(3, minmax(0, 1fr)); }
   .grid-6 { display: grid; grid-template-columns: repeat(6, minmax(160px, 1fr)); gap: 14px; min-width: 0; }
   .mb-16 { margin-bottom: 16px; }
   .full { height: 100%; }
@@ -1856,13 +1858,13 @@
       <!-- PAGE 2: 金融投诉统计分析                      -->
       <!-- ============================================= -->
       <div v-else-if="activePage === 'finance'" class="page-enter">
-        <div class="grid-6 mb-16" v-if="!dataReady.finance">
+        <div class="grid-4 mb-16 mix" v-if="!dataReady.finance">
           <div class="metric-card skel" v-for="i in 4" :key="i">
             <div class="skeleton" style="height:11px;width:45%"></div>
             <div class="skeleton" style="height:28px;width:75%"></div>
           </div>
         </div>
-        <div class="grid-6 mb-16" v-else>
+        <div class="grid-4 mb-16 mix" v-else>
           <div class="metric-card accent-cyan">
             <div class="label">金融投诉总量</div>
             <div class="value"><span v-countup="finData.cards.fin_total"></span></div>
@@ -1959,13 +1961,13 @@
         </div>
 
         <!-- 4 个模型评估指标卡：环形进度 + hover 指标解释 -->
-        <div class="grid-4 mb-16" v-if="!textaiReady">
+        <div class="grid-4 mb-16 mix" v-if="!textaiReady">
           <div class="metric-card skel" v-for="i in 4" :key="i">
             <div class="skeleton" style="height:11px;width:45%"></div>
             <div class="skeleton" style="height:28px;width:75%"></div>
           </div>
         </div>
-        <div class="grid-4 mb-16" v-else>
+        <div class="grid-4 mb-16 mix" v-else>
           <div class="metric-card" :class="'accent-'+m.accent" v-for="m in metricCards" :key="m.key">
             <div class="metric-flex">
               <div style="min-width:0;">
@@ -2328,13 +2330,13 @@
       <!-- PAGE 4: 电信投诉分析                          -->
       <!-- ============================================= -->
       <div v-else-if="activePage === 'telecom'" class="page-enter">
-        <div class="grid-4 mb-16" v-if="!dataReady.telecom">
+        <div class="grid-4 mb-16 mix" v-if="!dataReady.telecom">
           <div class="metric-card skel" v-for="i in 4" :key="i">
             <div class="skeleton" style="height:11px;width:45%"></div>
             <div class="skeleton" style="height:28px;width:75%"></div>
           </div>
         </div>
-        <div class="grid-4 mb-16" v-else>
+        <div class="grid-4 mb-16 mix" v-else>
           <div class="metric-card accent-orange">
             <div class="label">电信投诉总量</div>
             <div class="value"><span v-countup="fccData.cards.fcc_total"></span></div>
@@ -2410,13 +2412,13 @@
       <!-- PAGE 5: 智能预警中心                          -->
       <!-- ============================================= -->
       <div v-else-if="activePage === 'alert'" class="page-enter">
-        <div class="grid-4 mb-16" v-if="!dataReady.alert">
+        <div class="grid-4 mb-16 mix" v-if="!dataReady.alert">
           <div class="metric-card skel" v-for="i in 4" :key="i">
             <div class="skeleton" style="height:11px;width:45%"></div>
             <div class="skeleton" style="height:28px;width:75%"></div>
           </div>
         </div>
-        <div class="grid-4 mb-16" v-else>
+        <div class="grid-4 mb-16 mix" v-else>
           <div class="metric-card accent-cyan">
             <div class="label">监测周期内预警总数</div>
             <div class="value"><span v-countup="alertData.summary.total_alerts"></span></div>
@@ -2536,7 +2538,7 @@
       <!-- ============================================= -->
       <div v-else-if="activePage === 'cluster'" class="page-enter">
         <!-- 指标卡 -->
-        <div class="grid-4 mb-16">
+        <div class="grid-4 mb-16 mix">
           <div class="metric-card accent-cyan">
             <div class="label">HDFS 已用 / 总容量</div>
             <div class="value cluster-num">{{ cluster.hdfs.used }}<span class="suffix">/ {{ cluster.hdfs.total }}</span></div>

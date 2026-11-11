@@ -8,6 +8,7 @@ mr_result/
 *.csv
 *.pkl
 .screenshots/
+docs/screenshots/
 
 # 敏感与运行产物
 .env

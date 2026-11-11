@@ -6728,6 +6728,9 @@ const app = createApp({
 
     // ========= 点击下钻 → 数据查询中心 =========
     function drillToQuery(source, { state = '', category = '', keyword = '' } = {}) {
+      // 关键词来自词云/文本域时，结构化数据集里该列已脱敏成 XXXX，必然查不到，
+      // 自动切到带原文的数据集，否则下钻结果永远是 0 条
+      if (keyword && source === 'cfpb') source = 'cfpb_text';
       queryTab.value = 'detail';
       qDetail.source = source;
       qDetail.state = state; qDetail.category = category; qDetail.keyword = keyword;

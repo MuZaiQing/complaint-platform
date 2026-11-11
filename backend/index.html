@@ -736,6 +736,15 @@
     .grid-4 > .card, .grid-6 > .metric-card { animation: none !important; }
     .card:hover::after { opacity: 0; }
   }
+  /* 特效开关关闭（含软渲染自动降级）：只停动画，保留全部静态层次 */
+  body[data-fx="off"]::before { animation: none !important; }
+  body[data-fx="off"] .page-enter,
+  body[data-fx="off"] .grid-2 > .card, body[data-fx="off"] .grid-3 > .card,
+  body[data-fx="off"] .grid-4 > .card, body[data-fx="off"] .grid-6 > .metric-card {
+    animation: none !important;
+  }
+  body[data-fx="off"] .card::after { animation: none !important; opacity: 0 !important; }
+  body[data-fx="off"] .card:hover { transform: none; }
   /* 卡片光斑：鼠标位置写入 --mx/--my，纯 CSS 渐变叠加，不拦截交互
      斜向反光只有 2.8%，模拟玻璃受光，避免整片均匀发亮产生塑料感 */
   .card {
@@ -1675,6 +1684,10 @@
         <button class="auto-btn" :class="{ on: autoRefresh }" @click="toggleAutoRefresh"
                 :title="autoRefresh ? '已开启：每 30s 自动拉取一次（仅当前可见页）' : '开启自动刷新：每 30s 拉取一次'">
           {{ autoRefresh ? 'AUTO ON' : 'AUTO' }}
+        </button>
+        <button class="auto-btn" :class="{ on: fxOn }" @click="toggleFx"
+                :title="fxOn ? '动效已开启：点击切换到克制模式（关噪点/流光/滚动）' : '动效已关闭：点击恢复'">
+          {{ fxOn ? 'FX ON' : 'FX OFF' }}
         </button>
         <span class="src-label">数据源：CFPB · FCC</span>
         <span class="stat-chip" v-if="overview">金融 {{ fmt(overview.cards.fin_total) }} / 电信 {{ fmt(overview.cards.fcc_total) }}</span>
@@ -3142,6 +3155,24 @@ const app = createApp({
       applyTheme();
       disposeAllCharts();
       nextTick(() => { renderCharts(activePage.value); setTimeout(resizeAllCharts, 250); });
+    };
+
+    // ========= 动效开关（软渲染自动降级为克制模式） =========
+    const detectSoftGL = () => {
+      try {
+        const gl = document.createElement('canvas').getContext('webgl');
+        const ext = gl && gl.getExtension('WEBGL_debug_renderer_info');
+        const name = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+        return /swiftshader|llvmpipe|software|basic render/i.test(name);
+      } catch (e) { return false; }
+    };
+    const fxOn = ref(localStorage.getItem('fx') !== 'off' && !detectSoftGL());
+    const applyFx = () => { document.body.dataset.fx = fxOn.value ? 'on' : 'off'; };
+    applyFx();
+    const toggleFx = () => {
+      fxOn.value = !fxOn.value;
+      localStorage.setItem('fx', fxOn.value ? 'on' : 'off');
+      applyFx();
     };
 
     // ========= 导航 =========
@@ -7748,6 +7779,8 @@ const app = createApp({
       switchTextaiBiz, wordAxisLog, renderWordTop20, shuffleWordCloud, shuffleFccWordCloud,
       queryTab, statsTableList, datasetsMeta, qStats, qDetail, detailVisibleCols,
       drawerVisible, currentRow, drawerCols,
+      // 动效开关
+      fxOn, toggleFx,
       aiInput, aiResult, aiLoading, aiMode, csvMeta, curSamples, aiRisk, aiHighlighted, aiHistory,
       fillSample, doAIPredict, onCorrection, exportAiHistory, kwDepth, drillAiToQuery,
       // 跨页联动
@@ -7781,14 +7814,17 @@ function runCountUp(el, to) {
   const target = Number(to);
   if (!isFinite(target)) { el.textContent = fmt(to); return; }
   const dec = (String(to).split('.')[1] || '').length;
-  const from = el.__cur || 0, start = performance.now(), dur = 400;
+  const write = (v) => { el.textContent = dec ? v.toFixed(dec) : fmt(Math.round(v)); };
+  // 关闭特效时直接落位，不做动画
+  if (document.body.dataset.fx === 'off') { el.__cur = target; write(target); return; }
+  const from = el.__cur || 0, start = performance.now(), dur = 800;
   if (el.__raf) cancelAnimationFrame(el.__raf);
   const tick = (t) => {
     const p = Math.min(1, (t - start) / dur);
-    const e = 1 - Math.pow(1 - p, 3);
+    const e = p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);   // easeOutExpo：前段快、末段稳稳停住
     const v = from + (target - from) * e;
     el.__cur = v;
-    el.textContent = dec ? v.toFixed(dec) : fmt(Math.round(v));
+    write(v);
     if (p < 1) el.__raf = requestAnimationFrame(tick);
   };
   el.__raf = requestAnimationFrame(tick);

@@ -4311,12 +4311,14 @@ const app = createApp({
       stage.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
-      // 场景底色与页面 --bg-0 保持一致，避免 3D 卡出现一块突兀的黑/米色
-      scene.background = new THREE.Color(isDark ? 0x1B2129 : 0xE2E8F0);
-      const camDist = 7.4;
+      // 透明底：3D 直接浮在卡片面上，不再挖出一块与卡面不同的灰色方块
+      scene.background = null;
+      renderer.setClearColor(0x000000, 0);
+      // 镜头拉远：地球在卡内留出上下呼吸空间，不再顶满显得突兀
+      const camDist = 10.4;
       const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
       camera.position.set(0, 0, camDist);
-      camera.lookAt(0, 0.28, 0);
+      camera.lookAt(0, 0.14, 0);
 
       // 柔和日照：浅色主题提高环境光，避免地球在白底上显成一坨灰
       scene.add(new THREE.AmbientLight(0xffffff, isDark ? 0.35 : 1.05));
@@ -4360,10 +4362,10 @@ const app = createApp({
               ? `rgba(108, 182, 255, ${alpha})`
               : `rgba(45, 58, 72, ${alpha})`;
           } else {
-            // 浅色玻璃白：州面比背景低一档明度，热力用主蓝加深
+            // 浅色玻璃白：州面比球体深一档，热力用主蓝加深
             return hot
-              ? 'rgba(31, 111, 235, 0.62)'
-              : 'rgba(216, 226, 238, 0.78)';
+              ? 'rgba(31, 111, 235, 0.70)'
+              : 'rgba(203, 219, 236, 0.85)';
           }
         })
         .polygonSideColor(() => isDark ? 'rgba(83,155,245,.10)' : 'rgba(31,111,235,.06)')
@@ -4385,8 +4387,19 @@ const app = createApp({
         tex.colorSpace = THREE.SRGBColorSpace;
         tex.anisotropy = 4;
         const mat = world.globeMaterial();
-        mat.map = tex;
-        mat.color = new THREE.Color(0xffffff);
+        if (isDark) {
+          mat.map = tex;
+          mat.color = new THREE.Color(0xffffff);
+          mat.emissive = new THREE.Color(0x000000);
+          mat.emissiveIntensity = 0;
+        } else {
+          // 浅色不贴卫星图：深色贴图压在白卡上必然发灰，改用浅色球体 + 州面填色，
+          // 既干净又和"白卡 + 数据柱"的语言一致
+          mat.map = null;
+          mat.color = new THREE.Color(0xDCE7F3);
+          mat.emissive = new THREE.Color(0xFFFFFF);
+          mat.emissiveIntensity = 0.16;
+        }
         mat.roughness = 0.85;
         mat.metalness = 0.0;
         mat.needsUpdate = true;
@@ -4400,7 +4413,7 @@ const app = createApp({
         const clouds = new THREE.Mesh(
           new THREE.SphereGeometry(R * 1.012, 48, 48),
           new THREE.MeshStandardMaterial({
-            map: tex, transparent: true, opacity: isDark ? 0.40 : 0.28, roughness: 1,
+            map: tex, transparent: true, opacity: isDark ? 0.40 : 0.18, roughness: 1,
             depthWrite: false
           })
         );
@@ -4632,7 +4645,7 @@ const app = createApp({
       });
 
       // —— 时间轴控制条：播放 / 拖动 / 累计 / 总量·人均 ——
-      const H0 = 0.10, HM = 0.90;
+      const H0 = 0.06, HM = 0.62;
       const monthEl = document.getElementById('gc-month');
       const rangeEl = document.getElementById('gc-range');
       const playBtn = document.getElementById('gc-play');

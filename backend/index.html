@@ -6834,6 +6834,8 @@ const app = createApp({
         c.setOption({
           // 方案 C：图表缩到 ~130px 高，grid 紧一点、图例右上角
           grid: { left: 42, right: 14, top: 30, bottom: 22, containLabel: false },
+          // 内置缩放：滚轮缩放、拖拽平移，不额外占高度
+          dataZoom: [{ type: 'inside', throttle: 60, zoomOnMouseWheel: true, moveOnMouseMove: true }],
           // tooltip 统一补充环比：看图即可读出增长/回落，减少口头解释
           tooltip: { trigger: 'axis', formatter: ps => {
             const i = ps[0].dataIndex, row = overview.value.trend[i];
@@ -6862,10 +6864,10 @@ const app = createApp({
               markPoint:{ symbol:'circle', symbolSize:9, silent:true, itemStyle:{ color:TC().line1 },
                 data:[{type:'max', name:'峰值'}],
                 label:{ show:true, position:'top', color:TC().line1, fontSize:10, fontWeight:600,
-                  formatter: p => '投诉峰值：' + fmt(p.value) } },
+                  formatter: p => '投诉峰值：' + fmt(p && p.value) } },
               markLine:{ symbol:'none', silent:true, data:[{type:'average', name:'金融均值'}],
                 lineStyle:{color:TC().line1, type:'dotted', width:1, opacity:.65},
-                label:{color:TC().line1, fontSize:9, position:'insideStartTop', formatter: p => '均值 ' + fmt(p.value)} },
+                label:{color:TC().line1, fontSize:9, position:'insideStartTop', formatter: p => '均值 ' + fmt(p && p.value)} },
               emphasis:{ focus:'series' } },
             { name:'电信投诉', type:'line', smooth:true, symbol:'circle', symbolSize:7, showSymbol:false,
               data: overview.value.trend.map(t=>t.fcc),
@@ -6873,7 +6875,7 @@ const app = createApp({
               itemStyle:{color: TC().line2}, areaStyle:{color: areaFade(TC().line2)},
               markLine:{ symbol:'none', silent:true, data:[{type:'average', name:'电信均值'}],
                 lineStyle:{color:TC().line2, type:'dotted', width:1, opacity:.65},
-                label:{color:TC().line2, fontSize:9, position:'insideStartBottom', formatter: p => '均值 ' + fmt(p.value)} },
+                label:{color:TC().line2, fontSize:9, position:'insideStartBottom', formatter: p => '均值 ' + fmt(p && p.value)} },
               emphasis:{ focus:'series' } },
           ],
         });
@@ -6907,7 +6909,7 @@ const app = createApp({
             // 10 行挤在 128px 里，柱宽必须小于行高，否则相邻柱会互相压住
             barWidth: 7, barCategoryGap: '42%',
             label:{show:true, position:'right', color:TC().legend, fontSize:9, fontFamily:'JetBrains Mono',
-              formatter: p => fmt(p.value)},
+              formatter: p => fmt(p && p.value)},
             labelLayout: { hideOverlap: true } }],
         });
         // 点击高频词 → AI 页自动填词并推理，形成「看词 → 验证模型」的演示闭环
@@ -6953,7 +6955,7 @@ const app = createApp({
             axisLabel:{color:TC().line1, fontSize:12}, axisLine:{lineStyle:{color:TC().axis}}},
           series:[{ type:'bar', data: top.map((c,i)=>({ value: c.complaint_count,
               itemStyle:{ color: barGradH(rankColor(i, TC().fin), '33'), borderRadius:[0,4,4,0] } })).reverse(),
-            label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value)} }],
+            label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value)} }],
         });
         c.on('click', p => { const item = top[top.length-1-p.dataIndex]; if (item) drillToQuery('cfpb', { keyword: item.company_name }); });
         startHighlightCarousel(c, top.length);
@@ -6989,7 +6991,7 @@ const app = createApp({
             axisLabel:{color:TC().line1, fontFamily:'JetBrains Mono', fontSize:11}, axisLine:{lineStyle:{color:TC().axis}}},
           series:[{ type:'bar', data: top.map((s,i)=>({ value: s.complaint_count,
               itemStyle:{ color: barGradH(rankColor(i, TC().fin), '33'), borderRadius:[0,4,4,0] } })).reverse(),
-            label:{show:true, position:'right', color:TC().legend, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value)} }],
+            label:{show:true, position:'right', color:TC().legend, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value)} }],
         });
         // 地图 hover → TOP5 条形高亮
         if (mapC) {
@@ -7022,7 +7024,7 @@ const app = createApp({
         const marks = [{ type:'max', name:'峰值', symbol:'circle', symbolSize:9,
           itemStyle:{ color:TC().line1 },
           label:{ show:true, position:'top', color:TC().line1, fontSize:10, fontWeight:600,
-            formatter: p => '投诉峰值：' + fmt(p.value) } }];
+            formatter: p => '投诉峰值：' + fmt(p && p.value) } }];
         if (focusIdx >= 0) {
           // 聚焦月用独立 pin 标注，和峰值批注区分开
           marks.push({ coord:[focus.month, d.monthly[focusIdx].complaint_count], name:'聚焦月',
@@ -7049,7 +7051,7 @@ const app = createApp({
             markPoint:{ data: marks, label:{color:TC().onAccent, fontSize:9} },
             markLine:{ symbol:'none', silent:true, data:[{type:'average', name:'月均'}],
               lineStyle:{color:TC().line1, type:'dotted', width:1, opacity:.6},
-              label:{color:TC().line1, fontSize:9, position:'insideEndTop', formatter: p => '月均 ' + fmt(p.value)} } }],
+              label:{color:TC().line1, fontSize:9, position:'insideEndTop', formatter: p => '月均 ' + fmt(p && p.value)} } }],
         });
         c.off('click');
         startPlayhead(c, d.monthly.length);
@@ -7087,7 +7089,7 @@ const app = createApp({
               axisLabel:{color:TC().line1, fontFamily:'JetBrains Mono'}, axisLine:{lineStyle:{color:TC().axis}}},
             series:[{ type:'bar', data: all.map((s,i)=>({ value: s.complaint_count,
                 itemStyle:{ color: barGradH(rankColor(i, TC().fin), '33'), borderRadius:[0,4,4,0] } })).reverse(),
-              label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value)} }],
+              label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value)} }],
           });
           c.on('click', p => { const item = all[all.length-1-p.dataIndex]; if (item) drillToQuery('cfpb', { state: item.state_code }); });
           startRankScroll(c, N, WIN);
@@ -7108,7 +7110,7 @@ const app = createApp({
           series:[{ type:'bar', barWidth:11,
             data: top5.map((s,i)=>({ value:s.complaint_count,
               itemStyle:{ color: barGradH(rankColor(i, TC().fin)), borderRadius:[0,4,4,0] } })).reverse(),
-            label:{ show:true, position:'right', color:TC().axisLabel, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value) },
+            label:{ show:true, position:'right', color:TC().axisLabel, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value) },
           }],
         });
       }
@@ -7126,7 +7128,7 @@ const app = createApp({
             axisLabel:{color:TC().line1, fontSize:11}, axisLine:{lineStyle:{color:TC().axis}}},
           series:[{ type:'bar', data: all.map((c,i)=>({ value: c.complaint_count,
               itemStyle:{ color: barGradH(rankColor(i, TC().fin), '33'), borderRadius:[0,4,4,0] } })).reverse(),
-            label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value)} }],
+            label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value)} }],
         });
         c.on('click', p => { const item = all[all.length-1-p.dataIndex]; if (item) drillToQuery('cfpb', { keyword: item.company_name }); });
         startRankScroll(c, N, WIN);
@@ -7442,7 +7444,7 @@ const app = createApp({
         const marks = [{ type:'max', name:'峰值', symbol:'circle', symbolSize:9,
           itemStyle:{ color:TC().line2 },
           label:{ show:true, position:'top', color:TC().line2, fontSize:10, fontWeight:600,
-            formatter: p => '投诉峰值：' + fmt(p.value) } }];
+            formatter: p => '投诉峰值：' + fmt(p && p.value) } }];
         if (focusIdx >= 0) {
           marks.push({ coord:[focus.month, d.monthly[focusIdx].complaint_count], name:'聚焦月',
             symbol:'pin', symbolSize:46, itemStyle:{ color:TC().line1 }, label:{ color:TC().onAccent, fontSize:9 } });
@@ -7468,7 +7470,7 @@ const app = createApp({
             markPoint:{ data: marks, label:{color:TC().onAccent, fontSize:9} },
             markLine:{ symbol:'none', silent:true, data:[{type:'average', name:'月均'}],
               lineStyle:{color:TC().line2, type:'dotted', width:1, opacity:.6},
-              label:{color:TC().line2, fontSize:9, position:'insideEndTop', formatter: p => '月均 ' + fmt(p.value)} } }],
+              label:{color:TC().line2, fontSize:9, position:'insideEndTop', formatter: p => '月均 ' + fmt(p && p.value)} } }],
         });
         startPlayhead(c, d.monthly.length);
       }
@@ -7523,7 +7525,7 @@ const app = createApp({
               axisLabel:{color:TC().line2, fontFamily:'JetBrains Mono'}, axisLine:{lineStyle:{color:TC().axis}}},
             series:[{ type:'bar', data: all.map((s,i)=>({ value: s.complaint_count,
                 itemStyle:{ color: barGradH(rankColor(i, TC().fcc), '33'), borderRadius:[0,4,4,0] } })).reverse(),
-              label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value)} }],
+              label:{show:true, position:'right', color:TC().legend, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value)} }],
           });
           c.on('click', p => { const item = all[all.length-1-p.dataIndex]; if (item) drillToQuery('fcc', { state: item.state_code }); });
           startRankScroll(c, N, WIN);
@@ -7544,7 +7546,7 @@ const app = createApp({
           series:[{ type:'bar', barWidth:11,
             data: top5.map((s,i)=>({ value:s.complaint_count,
               itemStyle:{ color: barGradH(rankColor(i, TC().fcc)), borderRadius:[0,4,4,0] } })).reverse(),
-            label:{ show:true, position:'right', color:TC().axisLabel, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p.value) },
+            label:{ show:true, position:'right', color:TC().axisLabel, fontSize:10, fontFamily:'JetBrains Mono', formatter: p => fmt(p && p.value) },
           }],
         });
       }

@@ -239,74 +239,106 @@ git commit -m "feat(theme): 双主题换为深灰蓝玻璃与白灰工业配色"
 
 ---
 
-### Task 2: 删除全部霓虹与光晕
+### Task 2: 霓虹质感化（保留发光，去塑料感）
 
 **Files:**
-- Modify: `backend/index.html`（CSS 动画段、`.card`、`.deck-card`、图表配置）
+- Modify: `backend/index.html`（`:root` 阴影令牌、`.card` 伪元素、图表 series 发光参数）
 
-- [ ] **Step 1: 清掉图表发光**
+- [ ] **Step 1: 阴影改为 4 层叠加**
 
-把每个 ECharts series 里的 `shadowBlur` / `shadowColor` 删除，保留原有 `lineStyle.width`。涉及位置（搜索定位）：
+把真机深色 `:root` 里的 `--shadow-glow` / `--shadow-hover` 替换为：
+
+```css
+    --shadow-glow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      inset 0 -1px 0 rgba(0,0,0,.28),
+      0 1px 2px rgba(0,0,0,.28),
+      0 10px 28px -12px rgba(0,0,0,.55);
+    --shadow-hover:
+      inset 0 1px 0 rgba(255,255,255,.10),
+      inset 0 -1px 0 rgba(0,0,0,.30),
+      0 2px 4px rgba(0,0,0,.30),
+      0 16px 36px -14px rgba(0,0,0,.60);
+    --shadow-neon: 0 0 0 1px rgba(83,155,245,.22), 0 0 18px -4px rgba(83,155,245,.35);
+```
+
+浅色主题保持 `--shadow-glow` 的轻投影，不叠加色光。
+
+- [ ] **Step 2: 渐变描边替代纯色边**
+
+覆盖 `.card` 的 `::after`（若无则新增）：
+
+```css
+  .card::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(126,160,196,.34), rgba(126,160,196,.10) 40%, rgba(0,0,0,.20));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+  }
+  html[data-theme="light"] .card::after {
+    background: linear-gradient(180deg, rgba(31,35,40,.10), rgba(31,35,40,.04) 45%, rgba(31,35,40,.08));
+  }
+```
+
+- [ ] **Step 3: 全卡旋转光带 → 顶边局部流光**
+
+把现有 `.card::before` 的旋转光带（`card-ang-spin`）替换为 BorderBeam：
+
+```css
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; height: 1px; width: 120px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: .55; display: block; animation: beam-move 8s linear infinite;
+  }
+  @keyframes beam-move {
+    0% { transform: translateX(-120px); }
+    100% { transform: translateX(calc(100% + 120px)); }
+  }
+```
+
+- [ ] **Step 4: 图表发光降为贴边光**
+
+折线：
 
 ```js
-// 示例：删除这两个属性
+// 原来
 lineStyle:{ width:2.4, shadowBlur:12, shadowColor: TC().line1 + '66' }
 // 改为
-lineStyle:{ width:1.6 }
+lineStyle:{ width:1.8, shadowBlur:6, shadowOffsetY:2, shadowColor: TC().line1 + '55' }
 ```
+
+柱状：只给 top1 色保留 `shadowBlur: 8`，normal 色删掉发光：
+
 ```js
-itemStyle:{ color: barGradH(...), borderRadius:[0,4,4,0],
-  shadowBlur: 8, shadowColor: TC().yes + '44' }
-// 改为
-itemStyle:{ color: barGradH(...), borderRadius:[0,2,2,0] }
+itemStyle:{ color: barGradH(TC().fin.top1), borderRadius:[0,2,2,0],
+  shadowBlur: 8, shadowOffsetY: 1, shadowColor: TC().fin.top1 + '40' }
 ```
 
-Run 校验：
-```powershell
-Select-String -Path backend\index.html -Pattern 'shadowBlur'
-```
-Expected: 无输出。
-
-- [ ] **Step 2: 清掉 CSS 光晕动画**
-
-删除以下 keyframes 引用与定义：`aurora-drift`、`card-ang-spin`、`scan-y`、`page-scan`、`alert-sweep`、`title-sweep`、`radar-spin`、`star-drift`、`word-ripple`。
-对应元素（`.amb-stars`、`.amb-radar .sweep`、`.amb-scan`、`.page-enter::after`、`.page-title::after`）整块删除。
-把 `body::before` 的径向渐变改为：
-```css
-  body::before {
-    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    background: linear-gradient(180deg, rgba(83,155,245,.05) 0%, transparent 220px);
-  }
-```
-
-- [ ] **Step 3: 卡片去掉旋转光带与内发光**
+- [ ] **Step 5: 材质瑕疵层**
 
 ```css
-  .card::before { display: none; }
-  .card::after { display: none; }
   .card {
-    box-shadow: var(--shadow-glow);
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.030) 0%, transparent 42%);
   }
   html[data-theme="light"] .card {
-    backdrop-filter: none; -webkit-backdrop-filter: none;
+    background-image: linear-gradient(135deg, rgba(9,105,218,.020) 0%, transparent 45%);
   }
 ```
 
-- [ ] **Step 4: 校验 + 提交**
+- [ ] **Step 6: 校验 + 提交**
 
 ```powershell
-Select-String -Path backend\index.html -Pattern 'shadowBlur|aurora-drift|card-ang-spin'
+Select-String -Path backend\index.html -Pattern 'shadowBlur: *(2[1-9]|[3-9]\d)'
 & 'D:\ruan_jain_an_zhuang\python-3.13.7\python.exe' scripts/check_ui.py
 git add backend/index.html
-git commit -m "style(theme): 移除霓虹光晕、旋转光带与扫描动画"
+git commit -m "style(theme): 霓虹改为分层贴边光、渐变描边与顶边流光"
 ```
-Expected: grep 无输出；校验脚本 0 报错，截图里不再有发光边缘。
+Expected: 无 `shadowBlur >= 21` 命中；校验脚本 0 报错。
 
 ---
 
-### Task 3: 材质层（噪点 + 哑光 + 表格）
+### Task 3: 材质层（噪点 + 表格细线）
 
 **Files:**
 - Modify: `backend/index.html`（CSS 全局层）
@@ -322,16 +354,7 @@ Expected: grep 无输出；校验脚本 0 报错，截图里不再有发光边�
   html[data-theme="light"] body::after { opacity: .020; }
 ```
 
-- [ ] **Step 2: 深色卡片补 1px 内高光**
-
-```css
-  html[data-theme="dark"] .card,
-  html:not([data-theme]) .card {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), var(--shadow-glow);
-  }
-```
-
-- [ ] **Step 3: 表格去斑马纹改底线**
+- [ ] **Step 2: 表格去斑马纹改底线**
 
 ```css
   .el-table tr > td { border-bottom-color: var(--border) !important; }
@@ -339,12 +362,12 @@ Expected: grep 无输出；校验脚本 0 报错，截图里不再有发光边�
   .el-table__body tr:hover > td { background: var(--bg-3) !important; }
 ```
 
-- [ ] **Step 4: 校验 + 提交**
+- [ ] **Step 3: 校验 + 提交**
 
 ```powershell
 & 'D:\ruan_jain_an_zhuang\python-3.13.7\python.exe' scripts/check_ui.py
 git add backend/index.html
-git commit -m "style(material): 全局噪点、深色内高光与表格细线化"
+git commit -m "style(material): 全局噪点层与表格细线化"
 ```
 
 ---
@@ -614,14 +637,14 @@ Expected: `errors: []`，`overflow: 0`，`docs/screenshots/` 12 张图齐备。
 - [ ] **Step 2: 人工看 4 张关键图**
 
 `docs/screenshots/综合数据驾驶舱.png`、`综合数据驾驶舱_light.png`、`智能预警中心.png`、`金融投诉统计分析.png`
-检查：无发光边缘、KPI 混排成立、图表交互控件可见、文字对比度足够。
+检查：发光为分层贴边光而非单层泛光、KPI 混排成立、图表交互控件可见、文字对比度足够。
 
 - [ ] **Step 3: 残留检查**
 
 ```powershell
-Select-String -Path backend\index.html -Pattern 'shadowBlur|#00D8FF|aurora-drift|linear-gradient\(135deg, var\(--bg-2\)'
+Select-String -Path backend\index.html -Pattern 'shadowBlur: *(2[1-9]|[3-9]\d)|#00D8FF|#FF9533'
 ```
-Expected: 无输出。
+Expected: 无输出（发光半径均 ≤ 20，旧高饱和色已清除）。
 
 - [ ] **Step 4: 提交收尾**
 

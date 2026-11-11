@@ -255,7 +255,7 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 16px 18px;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.035), var(--elev-1);
+    box-shadow: var(--shadow-glow);
     position: relative; overflow: hidden;
     backdrop-filter: blur(12px) saturate(1.06);
     -webkit-backdrop-filter: blur(12px) saturate(1.06);
@@ -725,16 +725,33 @@
     .grid-4 > .card, .grid-6 > .metric-card { animation: none !important; }
     .card:hover::after { opacity: 0; }
   }
-  /* 卡片光斑：鼠标位置写入 --mx/--my，纯 CSS 渐变叠加，不拦截交互 */
+  /* 卡片光斑：鼠标位置写入 --mx/--my，纯 CSS 渐变叠加，不拦截交互
+     斜向反光只有 2.8%，模拟玻璃受光，避免整片均匀发亮产生塑料感 */
   .card {
-    background-image: radial-gradient(300px circle at var(--mx, 50%) var(--my, 50%),
-      color-mix(in srgb, var(--cyan) 9%, transparent), transparent 68%);
+    background-image:
+      linear-gradient(135deg, rgba(255,255,255,.028) 0%, transparent 44%),
+      radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in srgb, var(--cyan) 6%, transparent), transparent 66%);
+  }
+  html[data-theme="light"] .card {
+    background-image:
+      linear-gradient(135deg, rgba(31,111,235,.018) 0%, transparent 46%),
+      radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 66%);
   }
   .metric-card {
     background-image:
-      radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
-        color-mix(in srgb, var(--cyan) 11%, transparent), transparent 68%),
+      linear-gradient(135deg, rgba(255,255,255,.032) 0%, transparent 46%),
+      radial-gradient(210px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in srgb, var(--cyan) 8%, transparent), transparent 66%),
       linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 100%);
+  }
+  html[data-theme="light"] .metric-card {
+    background-image:
+      linear-gradient(135deg, rgba(31,111,235,.020) 0%, transparent 48%),
+      radial-gradient(210px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in srgb, var(--cyan) 8%, transparent), transparent 66%),
+      linear-gradient(135deg, #FFFFFF 0%, var(--bg-1) 100%);
   }
   /* 卡片逐张上浮：页面重建时按索引错开 50ms */
   .grid-2 > .card, .grid-3 > .card, .grid-4 > .card, .grid-6 > .metric-card {
@@ -1230,7 +1247,7 @@
     .el-table th.el-table__cell { backdrop-filter: none; }
   }
   @supports not (background: color-mix(in srgb, red, blue)) {
-    :root { --card-face: rgba(21,24,29,.9); }
+    :root { --card-face: rgba(41,54,68,.92); }
     html[data-theme="light"] { --card-face: rgba(255,255,255,.94); }
   }
 
@@ -3075,16 +3092,16 @@ function wordCatLegend(rows, biz) {
   const order = ['credit','debt','account','card','loan','fraud','robocall','billing','network','device','other'];
   return [...seen.values()].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
 }
-// 面积渐变：40% 不透明 → 全透明（hex 须为 #RRGGBB）
+// 面积渐变：25% → 8% → 全透明，3 段缓冲让底部收得更自然（hex 须为 #RRGGBB）
 const areaFade = (hex) => new echarts.graphic.LinearGradient(0,0,0,1,[
-  { offset:0, color: hex + '66' }, { offset:1, color: hex + '00' }]);
+  { offset:0, color: hex + '40' }, { offset:.55, color: hex + '14' }, { offset:1, color: hex + '00' }]);
 
-// 柱状渐变（横向）：左淡右实，让条形末端与数值标签自然衔接（hex 须为 #RRGGBB）
+// 柱状渐变（横向）：左淡右实，3 段缓冲避免两端硬切的塑料感（hex 须为 #RRGGBB）
 const barGradH = (hex, alpha = '22') => new echarts.graphic.LinearGradient(0,0,1,0,[
-  { offset:0, color: hex + alpha }, { offset:1, color: hex }]);
+  { offset:0, color: hex + alpha }, { offset:.62, color: hex + 'CC' }, { offset:1, color: hex }]);
 // 柱状渐变（纵向）：下淡上实，用于竖排柱状图（hex 须为 #RRGGBB）
 const barGradV = (hex, alpha = '55') => new echarts.graphic.LinearGradient(0,1,0,0,[
-  { offset:0, color: hex + alpha }, { offset:1, color: hex }]);
+  { offset:0, color: hex + alpha }, { offset:.62, color: hex + 'CC' }, { offset:1, color: hex }]);
 
 // ======= 极简线性图标（lucide 风，currentColor 随主题/选中态变色） =======
 const _svg = (inner) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">' + inner + '</svg>';
@@ -4239,7 +4256,8 @@ const app = createApp({
       stage.appendChild(renderer.domElement);
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(isDark ? 0x050608 : 0xfaf6ee);
+      // 场景底色与页面 --bg-0 保持一致，避免 3D 卡出现一块突兀的黑/米色
+      scene.background = new THREE.Color(isDark ? 0x1B2129 : 0xF1F4F8);
       const camDist = 7.4;
       const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
       camera.position.set(0, 0, camDist);
@@ -4282,23 +4300,23 @@ const app = createApp({
           const total = code ? cumTotal(code) : 0;
           const hot = total > hotThreshold;
           if (isDark) {
-            const alpha = hot ? 0.78 : 0.55;
+            const alpha = hot ? 0.80 : 0.52;
             return hot
-              ? `rgba(255, 170, 100, ${alpha})`
-              : `rgba(30, 42, 58, ${alpha})`;
+              ? `rgba(108, 182, 255, ${alpha})`
+              : `rgba(45, 58, 72, ${alpha})`;
           } else {
-            // 浅色奶油学术主题：州面颜色稍低于背景亮度，热力换柔和玫红
+            // 浅色玻璃白：州面比背景低一档明度，热力用主蓝加深
             return hot
-              ? 'rgba(198, 108, 138, 0.68)'   // 克制玫红热力
-              : 'rgba(215, 208, 196, 0.72)'; // 暖灰米州面，略低于背景
+              ? 'rgba(31, 111, 235, 0.62)'
+              : 'rgba(216, 226, 238, 0.78)';
           }
         })
-        .polygonSideColor(() => isDark ? 'rgba(120,180,220,.10)' : 'rgba(140,120,110,.08)')
-        .polygonStrokeColor(() => isDark ? 'rgba(255,255,255,0.6)' : 'rgba(55,45,35,0.7)')
+        .polygonSideColor(() => isDark ? 'rgba(83,155,245,.10)' : 'rgba(31,111,235,.06)')
+        .polygonStrokeColor(() => isDark ? 'rgba(200,220,240,.55)' : 'rgba(80,100,125,.60)')
         .polygonsTransitionDuration(0);
 
       world.showAtmosphere(true)
-        .atmosphereColor(isDark ? '#b8d4f5' : '#a8b8c8')
+        .atmosphereColor(isDark ? '#6CB6FF' : '#BFD6F0')
         .atmosphereAltitude(0.18);
       world.scale.setScalar(R / 100);   // three-globe 内置半径 100 → 归一到 R
       world.rotation.y = Math.PI / 2;   // 经度约定对齐（美国朝向镜头）
@@ -6796,7 +6814,7 @@ const app = createApp({
           series: [
             { name:'金融投诉', type:'line', smooth:true, symbol:'circle', symbolSize:7, showSymbol:false,
               data: overview.value.trend.map(t=>t.fin),
-              lineStyle:{ width:2.4, shadowBlur:12, shadowColor: TC().line1 + '66' },
+              lineStyle:{ width:1.8, shadowBlur:6, shadowOffsetY:2, shadowColor: TC().line1 + '55' },
               itemStyle:{color: TC().line1}, areaStyle:{color: areaFade(TC().line1)},
               // 峰值批注 + 均值参考虚线：图表自带解读
               markPoint:{ symbol:'circle', symbolSize:9, silent:true, itemStyle:{ color:TC().line1 },
@@ -6809,7 +6827,7 @@ const app = createApp({
               emphasis:{ focus:'series' } },
             { name:'电信投诉', type:'line', smooth:true, symbol:'circle', symbolSize:7, showSymbol:false,
               data: overview.value.trend.map(t=>t.fcc),
-              lineStyle:{ width:2.4, shadowBlur:12, shadowColor: TC().line2 + '66' },
+              lineStyle:{ width:1.8, shadowBlur:6, shadowOffsetY:2, shadowColor: TC().line2 + '55' },
               itemStyle:{color: TC().line2}, areaStyle:{color: areaFade(TC().line2)},
               markLine:{ symbol:'none', silent:true, data:[{type:'average', name:'电信均值'}],
                 lineStyle:{color:TC().line2, type:'dotted', width:1, opacity:.65},
@@ -6842,8 +6860,8 @@ const app = createApp({
             axisLabel:{color:TC().line1, fontFamily:'JetBrains Mono', fontSize:9, interval:0},
             axisLine:{lineStyle:{color:TC().axis}} },
           series: [{ type:'bar', data: top10.map(w=>w.freq).reverse(),
-            itemStyle:{ color: barGradH(TC().yes), borderRadius:[0,4,4,0],
-              shadowBlur: 8, shadowColor: TC().yes + '44' },
+            itemStyle:{ color: barGradH(TC().fin.top1), borderRadius:[0,2,2,0],
+              shadowBlur: 6, shadowOffsetY: 1, shadowColor: TC().fin.top1 + '40' },
             // 10 行挤在 128px 里，柱宽必须小于行高，否则相邻柱会互相压住
             barWidth: 7, barCategoryGap: '42%',
             label:{show:true, position:'right', color:TC().legend, fontSize:9, fontFamily:'JetBrains Mono',
@@ -7517,7 +7535,7 @@ const app = createApp({
         return trends.filter(t => t.alert_level !== 'green').map(t => ({
           value: [t.month, t.count],
           itemStyle: { color: color, borderColor: '#fff', borderWidth: 2,
-            shadowBlur: t.alert_level === 'red' ? 18 : 8, shadowColor: color },
+            shadowBlur: t.alert_level === 'red' ? 10 : 5, shadowOffsetY: 1, shadowColor: color },
           symbolSize: t.alert_level === 'red' ? 14 : 10,
           label: { show: true, formatter: t.alert_level === 'red' ? '🔴' : '🟡', position: 'top' },
         }));

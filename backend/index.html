@@ -105,11 +105,11 @@
   }
   /* ========= 玻璃拟态白（浅色 · 蓝玻璃） ========= */
   html[data-theme="light"] {
-    --bg-0: #F1F4F8;
-    --bg-1: #F7FAFC;
-    --bg-2: rgba(255,255,255,.76);
-    --bg-3: #E8EDF3;
-    --border: rgba(31,35,40,.10);
+    --bg-0: #E2E8F0;
+    --bg-1: #F6F9FC;
+    --bg-2: #FFFFFF;
+    --bg-3: #EEF2F7;
+    --border: rgba(31,35,40,.18);
     --fg-0: #1F2328;
     --fg-1: #59636E;
     --fg-2: #8C959F;
@@ -127,11 +127,13 @@
     --purple: #8250DF;
     --purple-dim: rgba(130,80,223,.09);
     --on-accent: #FFFFFF;
-    --shadow-glow: 0 1px 2px rgba(31,35,40,.06), 0 8px 24px -12px rgba(31,35,40,.14);
-    --shadow-hover: 0 2px 4px rgba(31,35,40,.08), 0 14px 32px -14px rgba(31,35,40,.20);
-    --fin-top1: #0969DA; --fin-top23: #218BFF; --fin-normal: #9DC3F0;
-    --fcc-top1: #9A6700; --fcc-top23: #BF8700; --fcc-normal: #E5C77A;
-    --other-gray: #AFB8C1;
+    /* 浅色不用玻璃：卡片给实色白 + 明确边界，靠边框和投影分层，而不是靠模糊 */
+    --card-face: #FFFFFF;
+    --shadow-glow: 0 1px 2px rgba(31,35,40,.10), 0 3px 12px -4px rgba(31,35,40,.14);
+    --shadow-hover: 0 2px 5px rgba(31,35,40,.12), 0 12px 28px -10px rgba(31,35,40,.20);
+    --fin-top1: #0969DA; --fin-top23: #218BFF; --fin-normal: #7FB0E8;
+    --fcc-top1: #9A6700; --fcc-top23: #BF8700; --fcc-normal: #DDB44A;
+    --other-gray: #9AA5B1;
   }
   /* 图表结论小卡片 */
   .conclusion {
@@ -695,6 +697,12 @@
     animation: aurora-drift 36s var(--ease-out) infinite alternate;
     will-change: transform;
   }
+  /* 浅色下极光压到很低，否则白底会泛出一层蓝紫雾，显脏 */
+  html[data-theme="light"] body::before {
+    background:
+      radial-gradient(880px 600px at 14% -12%, color-mix(in srgb, var(--cyan) 5%, transparent), transparent 70%),
+      radial-gradient(820px 540px at 92% 2%, color-mix(in srgb, var(--purple) 4%, transparent), transparent 72%);
+  }
   @keyframes aurora-drift {
     0%   { transform: translate3d(-1.6%, -1%, 0) scale(1); }
     100% { transform: translate3d(1.6%, 1.4%, 0) scale(1.07); }
@@ -716,7 +724,7 @@
     opacity: .030;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  html[data-theme="light"] #app::after { opacity: .020; }
+  html[data-theme="light"] #app::after { opacity: .012; }
   body[data-fx="off"] #app::after { display: none; }
   /* 卡片 hover 边框流光：沿卡片边缘缓慢绕行的细光，只有悬停时才跑 */
   @property --card-ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
@@ -755,24 +763,21 @@
         color-mix(in srgb, var(--cyan) 6%, transparent), transparent 66%);
   }
   html[data-theme="light"] .card {
-    background-image:
-      linear-gradient(135deg, rgba(31,111,235,.018) 0%, transparent 46%),
-      radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
-        color-mix(in srgb, var(--cyan) 7%, transparent), transparent 66%);
+    /* 浅色下只用一层方向性极淡渐变，不要鼠标光斑与彩色雾块 */
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #FCFDFE 100%);
+    backdrop-filter: none; -webkit-backdrop-filter: none;
   }
+  html[data-theme="light"] .metric-card {
+    background-image: linear-gradient(180deg, #FFFFFF 0%, #FAFCFE 100%);
+  }
+  /* 浅色下彩色装饰球只会显脏，直接隐掉 */
+  html[data-theme="light"] .metric-card::after { display: none; }
   .metric-card {
     background-image:
       linear-gradient(135deg, rgba(255,255,255,.032) 0%, transparent 46%),
       radial-gradient(210px circle at var(--mx, 50%) var(--my, 50%),
         color-mix(in srgb, var(--cyan) 8%, transparent), transparent 66%),
       linear-gradient(135deg, var(--bg-2) 0%, var(--bg-1) 100%);
-  }
-  html[data-theme="light"] .metric-card {
-    background-image:
-      linear-gradient(135deg, rgba(31,111,235,.020) 0%, transparent 48%),
-      radial-gradient(210px circle at var(--mx, 50%) var(--my, 50%),
-        color-mix(in srgb, var(--cyan) 8%, transparent), transparent 66%),
-      linear-gradient(135deg, #FFFFFF 0%, var(--bg-1) 100%);
   }
   /* 卡片逐张上浮：页面重建时按索引错开 50ms */
   .grid-2 > .card, .grid-3 > .card, .grid-4 > .card, .grid-6 > .metric-card {
@@ -843,6 +848,13 @@
   }
   .deck-card.is-tab .value .suffix { font-size: 10px; }
   .deck-card.is-tab .delta { display: none; }
+  /* 浅色下白卡叠白卡会只剩几条淡线，给标签条补一层可见的边界 */
+  html[data-theme="light"] .deck-card.is-tab {
+    background-image: none;
+    background-color: #FFFFFF;
+    border-color: rgba(31,35,40,.16);
+    box-shadow: 0 1px 2px rgba(31,35,40,.07), 0 1px 6px -2px rgba(31,35,40,.08);
+  }
   /* 未置顶的卡片：装饰圆斑压暗，避免右侧堆出一串彩色光斑 */
   .deck-card:not(.is-active)::after { opacity: .025; }
   .deck-card .value, .deck-card .delta { transition: opacity .3s var(--ease-out); }
@@ -1352,24 +1364,24 @@
   }
 
   /* ============================================================
-     商务级科幻 · 深空数据指挥中心（双主题）
-     原则：深色层打底、发光克制、玻璃拟态；浅色保持奶油底只叠轻科技
+     商务级科幻 · 蓝玻璃数据指挥中心（双主题）
+     原则：深色层打底、发光分层克制、玻璃拟态；浅色为白卡 + 明确边界
      ============================================================ */
   :root {
-    --space-a: #05070E; --space-b: #0A1022; --space-c: #0D0B1C;
+    --space-a: #181E26; --space-b: #1F2731; --space-c: #242E3A;
     --grid-ink: rgba(120,175,255,.11);
-    --scan-ink: rgba(0,216,255,.14);
+    --scan-ink: rgba(83,155,245,.10);
     --holo-line: rgba(120,190,255,.22);
-    --holo-glow: 0 0 20px rgba(0,216,255,.10);
+    --holo-glow: 0 0 18px -4px rgba(83,155,245,.28);
     --glass-face: color-mix(in srgb, var(--bg-2) 60%, transparent);
   }
   html[data-theme="light"] {
-    --space-a: #EAF0F8; --space-b: #F5F9FD; --space-c: #E2EAF5;
-    --grid-ink: rgba(37,99,235,.10);
-    --scan-ink: rgba(37,99,235,.08);
-    --holo-line: rgba(37,99,235,.16);
-    --holo-glow: 0 0 14px rgba(37,99,235,.07);
-    --glass-face: rgba(255,255,255,.62);
+    --space-a: #DCE4EF; --space-b: #E9EEF5; --space-c: #D6E0EC;
+    --grid-ink: rgba(37,99,235,.08);
+    --scan-ink: rgba(37,99,235,.045);
+    --holo-line: rgba(37,99,235,.10);
+    --holo-glow: none;
+    --glass-face: #FFFFFF;
   }
   body {
     background: linear-gradient(158deg, var(--space-a) 0%, var(--space-b) 44%, var(--space-c) 100%) fixed;
@@ -1423,14 +1435,13 @@
     0% { transform: translateY(-24vh); }
     100% { transform: translateY(112vh); }
   }
-  /* 玻璃拟态面板：半透明 + 细描边 + 轻微外发光 */
+  /* 玻璃拟态面板：底色与阴影统一由 --card-face / --shadow-glow 控制，这里只补描边 */
   .card {
-    background-color: var(--glass-face);
     border-color: color-mix(in srgb, var(--holo-line) 55%, var(--border));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.05), var(--elev-1), var(--holo-glow);
   }
   html[data-theme="light"] .card {
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.6), var(--elev-1);
+    border-color: var(--border);
+    box-shadow: var(--shadow-glow);
   }
   .topbar {
     background: color-mix(in srgb, var(--bg-1) 70%, transparent);
@@ -3063,8 +3074,8 @@ const THEMES = {
     mapArea:'#2A323C', mapBorder:'#39424D',
   },
   light: {
-    fin: { top1:'#0969DA', top23:'#218BFF', normal:'#9DC3F0', other:'#AFB8C1' },
-    fcc: { top1:'#9A6700', top23:'#BF8700', normal:'#E5C77A', other:'#AFB8C1' },
+    fin: { top1:'#0969DA', top23:'#218BFF', normal:'#7FB0E8', other:'#9AA5B1' },
+    fcc: { top1:'#9A6700', top23:'#BF8700', normal:'#DDB44A', other:'#9AA5B1' },
     line1:'#0969DA', line2:'#9A6700',
     yes:'#1A7F37', no:'#CF222E', purple:'#8250DF',
     axis:'#DDE3EA', axisLabel:'#8C959F', split:'rgba(31,35,40,.07)', legend:'#59636E',
@@ -4301,15 +4312,15 @@ const app = createApp({
 
       const scene = new THREE.Scene();
       // 场景底色与页面 --bg-0 保持一致，避免 3D 卡出现一块突兀的黑/米色
-      scene.background = new THREE.Color(isDark ? 0x1B2129 : 0xF1F4F8);
+      scene.background = new THREE.Color(isDark ? 0x1B2129 : 0xE2E8F0);
       const camDist = 7.4;
       const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
       camera.position.set(0, 0, camDist);
       camera.lookAt(0, 0.28, 0);
 
-      // 柔和日照：单一方向阳光 + 少量环境光
-      scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-      const sun = new THREE.DirectionalLight(0xffffff, 1.3);
+      // 柔和日照：浅色主题提高环境光，避免地球在白底上显成一坨灰
+      scene.add(new THREE.AmbientLight(0xffffff, isDark ? 0.35 : 1.05));
+      const sun = new THREE.DirectionalLight(0xffffff, isDark ? 1.3 : 0.9);
       sun.position.set(5, 4, 6);
       scene.add(sun);
 

@@ -35,35 +35,46 @@
     font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap;
     src: url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
   }
-  /* ========= 设计令牌（默认：暗夜霓虹 · 深色） ========= */
+  /* ========= 设计令牌（默认：蓝玻璃 · 深色） ========= */
   :root {
-    --bg-0: #0B0E13;
-    --bg-1: #0F131A;
-    --bg-2: #11151C;
-    --bg-3: #171C24;
-    --border: rgba(148,163,184,.14);
-    --fg-0: #E6E8EB;
-    --fg-1: #9AA3AE;
-    --fg-2: #6B7280;
-    --fg-3: #4B5159;
-    --cyan: #00D8FF;
-    --cyan-dim: rgba(0,216,255,.14);
-    --blue: #60A5FA;
-    --blue-dim: rgba(96,165,250,.14);
-    --green: #2DD4A7;
-    --green-dim: rgba(45,212,167,.12);
-    --red: #F2555A;
-    --red-dim: rgba(242,85,90,.14);
-    --orange: #FF9533;
-    --orange-dim: rgba(255,149,51,.12);
-    --purple: #A78BFA;
-    --purple-dim: rgba(167,139,250,.12);
-    --on-accent: #0B0E13;
-    --card-radius: 12px;
-    --shadow-glow: 0 4px 24px rgba(0,0,0,.35);
-    --shadow-hover: 0 8px 28px rgba(0,0,0,.5);
+    --bg-0: #1B2129;
+    --bg-1: #222A33;
+    --bg-2: #293644;
+    --bg-3: #2F3A47;
+    --border: rgba(126,160,196,.18);
+    --fg-0: #C9D6E2;
+    --fg-1: #93A4B6;
+    --fg-2: #6B7C8F;
+    --fg-3: #56646F;
+    --cyan: #539BF5;
+    --cyan-dim: rgba(83,155,245,.12);
+    --blue: #6CB6FF;
+    --blue-dim: rgba(108,182,255,.12);
+    --green: #57AB5A;
+    --green-dim: rgba(87,171,90,.12);
+    --red: #E5534B;
+    --red-dim: rgba(229,83,75,.12);
+    --orange: #C69026;
+    --orange-dim: rgba(198,144,38,.12);
+    --purple: #986EE2;
+    --purple-dim: rgba(152,110,226,.12);
+    --on-accent: #1B2129;
+    --card-radius: 10px;
+    /* 4 层阴影：顶部受光边 + 底部自阴影 + 接触影 + 环境影 */
+    --shadow-glow:
+      inset 0 1px 0 rgba(255,255,255,.07),
+      inset 0 -1px 0 rgba(0,0,0,.28),
+      0 1px 2px rgba(0,0,0,.28),
+      0 10px 28px -12px rgba(0,0,0,.55);
+    --shadow-hover:
+      inset 0 1px 0 rgba(255,255,255,.10),
+      inset 0 -1px 0 rgba(0,0,0,.30),
+      0 2px 4px rgba(0,0,0,.30),
+      0 16px 36px -14px rgba(0,0,0,.60);
+    /* 色光只留小半径贴边一层，避免大 blur 泛光 */
+    --shadow-neon: 0 0 0 1px rgba(83,155,245,.22), 0 0 18px -4px rgba(83,155,245,.35);
     /* 层级 / 间距 / 动效令牌（统一节奏，避免各卡片各写一套） */
-    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+    --radius-sm: 6px; --radius-md: 8px; --radius-lg: 10px;
     --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
     --dur-fast: .16s; --dur-base: .26s; --dur-slow: .5s;
     --ease-out: cubic-bezier(.22,.61,.36,1);
@@ -71,9 +82,9 @@
     --elev-2: 0 2px 6px rgba(0,0,0,.2), 0 14px 34px -16px rgba(0,0,0,.5);
     --card-face: color-mix(in srgb, var(--bg-2) 82%, transparent);
     /* 业务线配色（规范） */
-    --fin-top1: #00D8FF; --fin-top23: #4C8DFF; --fin-normal: #2A5A8C;
-    --fcc-top1: #FF9533; --fcc-top23: #FFB244; --fcc-normal: #774422;
-    --other-gray: #555555;
+    --fin-top1: #539BF5; --fin-top23: #6CB6FF; --fin-normal: #3D6A9E;
+    --fcc-top1: #C69026; --fcc-top23: #D4A241; --fcc-normal: #6E5420;
+    --other-gray: #5B6670;
     /* Element Plus 全局变量跟随主题 */
     --el-color-primary: var(--cyan);
     --el-color-primary-light-3: color-mix(in srgb, var(--cyan) 70%, var(--bg-2));
@@ -94,33 +105,33 @@
   }
   /* ========= 玻璃拟态白（浅色 · 蓝玻璃） ========= */
   html[data-theme="light"] {
-    --bg-0: #EEF2F7;
-    --bg-1: #F6F9FD;
-    --bg-2: rgba(255,255,255,.72);
-    --bg-3: #E4EAF2;
-    --border: rgba(37,99,235,.12);
-    --fg-0: #1E293B;
-    --fg-1: #475569;
-    --fg-2: #94A3B8;
-    --fg-3: #CBD5E1;
-    --cyan: #2563EB;
-    --cyan-dim: rgba(37,99,235,.10);
-    --blue: #06B6D4;
-    --blue-dim: rgba(6,182,212,.12);
-    --green: #059669;
-    --green-dim: rgba(5,150,105,.10);
-    --red: #DC2626;
-    --red-dim: rgba(220,38,38,.10);
-    --orange: #D97706;
-    --orange-dim: rgba(217,119,6,.10);
-    --purple: #8B5CF6;
-    --purple-dim: rgba(139,92,246,.10);
+    --bg-0: #F1F4F8;
+    --bg-1: #F7FAFC;
+    --bg-2: rgba(255,255,255,.76);
+    --bg-3: #E8EDF3;
+    --border: rgba(31,35,40,.10);
+    --fg-0: #1F2328;
+    --fg-1: #59636E;
+    --fg-2: #8C959F;
+    --fg-3: #AFB8C1;
+    --cyan: #1F6FEB;
+    --cyan-dim: rgba(31,111,235,.09);
+    --blue: #0969DA;
+    --blue-dim: rgba(9,105,218,.10);
+    --green: #1A7F37;
+    --green-dim: rgba(26,127,55,.09);
+    --red: #CF222E;
+    --red-dim: rgba(207,34,46,.09);
+    --orange: #9A6700;
+    --orange-dim: rgba(154,103,0,.09);
+    --purple: #8250DF;
+    --purple-dim: rgba(130,80,223,.09);
     --on-accent: #FFFFFF;
-    --shadow-glow: 0 1px 3px rgba(30,41,59,.08), 0 8px 24px rgba(30,41,59,.08);
-    --shadow-hover: 0 12px 32px rgba(30,41,59,.16);
-    --fin-top1: #2563EB; --fin-top23: #60A5FA; --fin-normal: #BFDBFE;
-    --fcc-top1: #F59E0B; --fcc-top23: #FBBF24; --fcc-normal: #FDE68A;
-    --other-gray: #CBD5E1;
+    --shadow-glow: 0 1px 2px rgba(31,35,40,.06), 0 8px 24px -12px rgba(31,35,40,.14);
+    --shadow-hover: 0 2px 4px rgba(31,35,40,.08), 0 14px 32px -14px rgba(31,35,40,.20);
+    --fin-top1: #0969DA; --fin-top23: #218BFF; --fin-normal: #9DC3F0;
+    --fcc-top1: #9A6700; --fcc-top23: #BF8700; --fcc-normal: #E5C77A;
+    --other-gray: #AFB8C1;
   }
   /* 图表结论小卡片 */
   .conclusion {
@@ -735,7 +746,7 @@
   .grid-6 > :nth-child(5) { animation-delay: .20s; }
   .grid-6 > :nth-child(6) { animation-delay: .25s; }
 
-  /* ========= 微交互（暗夜霓虹 · 纯净平面） ========= */
+  /* ========= 微交互（蓝玻璃 · 深色） ========= */
   .card { transition: box-shadow .25s ease, border-color .25s ease, transform .25s ease; }
   .card:hover {
     border-color: color-mix(in srgb, var(--cyan) 26%, var(--border));
@@ -1640,7 +1651,7 @@
         <span class="src-label">数据源：CFPB · FCC</span>
         <span class="stat-chip" v-if="overview">金融 {{ fmt(overview.cards.fin_total) }} / 电信 {{ fmt(overview.cards.fcc_total) }}</span>
         <button class="theme-toggle" @click="toggleTheme"
-                :title="theme === 'dark' ? '切换为浅色（玻璃拟态白）' : '切换为深色（暗夜霓虹）'"
+                :title="theme === 'dark' ? '切换为浅色（玻璃拟态白）' : '切换为深色（蓝玻璃）'"
                 v-html="theme === 'dark' ? ICONS.sun : ICONS.moon">
         </button>
       </div>
@@ -2991,37 +3002,37 @@ function startRankScroll(c, total, win = 12) {
   }, 500);
 }
 
-// ======= 双主题色板（ECharts 用；dark=暗夜霓虹 / light=玻璃拟态白） =======
+// ======= 双主题色板（ECharts 用；dark=蓝玻璃 / light=玻璃拟态白） =======
 const THEMES = {
   dark: {
-    fin: { top1:'#00D8FF', top23:'#4C8DFF', normal:'#2A5A8C', other:'#555555' },
-    fcc: { top1:'#FF9533', top23:'#FFB244', normal:'#774422', other:'#555555' },
-    line1:'#00D8FF', line2:'#FF9533',
-    yes:'#2DD4A7', no:'#F2555A', purple:'#A78BFA',
-    axis:'#232A33', axisLabel:'#6B7280', split:'rgba(148,163,184,.08)', legend:'#9AA3AE',
-    tooltipBg:'#11151C', tooltipBorder:'rgba(148,163,184,.16)', tooltipText:'#E6E8EB',
-    pieBorder:'#0F131A', onAccent:'#0B0E13',
-    wordPalette:['#00D8FF','#36D1FF','#2DD4A7','#A78BFA','#FF9533','#5EEAD4','#7DD3FC','#F0ABFC'],
-    fccWordPalette:['#FF9533','#FFB244','#FFC966','#F0AB6B','#E0883A','#C77B3A'],
-    wordCat:['#00D8FF','#A78BFA','#2DD4A7','#FF9533','#F2555A','#7DD3FC'],
-    mapRange:['#11151C','#123B52','#00D8FF','#A78BFA'],
-    mapRangeFcc:['#11151C','#4A2E18','#FF9533','#FFC966'],
-    mapArea:'#11151C', mapBorder:'#232A33',
+    fin: { top1:'#539BF5', top23:'#6CB6FF', normal:'#3D6A9E', other:'#5B6670' },
+    fcc: { top1:'#C69026', top23:'#D4A241', normal:'#6E5420', other:'#5B6670' },
+    line1:'#539BF5', line2:'#C69026',
+    yes:'#57AB5A', no:'#E5534B', purple:'#986EE2',
+    axis:'#39424D', axisLabel:'#768390', split:'rgba(173,186,199,.10)', legend:'#ADBAC7',
+    tooltipBg:'#2D333B', tooltipBorder:'#444C56', tooltipText:'#C9D6E2',
+    pieBorder:'#222A33', onAccent:'#1B2129',
+    wordPalette:['#539BF5','#6CB6FF','#57AB5A','#986EE2','#C69026','#4FB3A9','#7FC8F8','#B083F0'],
+    fccWordPalette:['#C69026','#D4A241','#B07D1E','#8C641A','#A87C2B','#7A5616'],
+    wordCat:['#539BF5','#986EE2','#57AB5A','#C69026','#E5534B','#4FB3A9'],
+    mapRange:['#222A33','#2F4A66','#539BF5','#986EE2'],
+    mapRangeFcc:['#222A33','#4A3A1E','#C69026','#D4A241'],
+    mapArea:'#2A323C', mapBorder:'#39424D',
   },
   light: {
-    fin: { top1:'#2563EB', top23:'#3B82F6', normal:'#93C5FD', other:'#CBD5E1' },
-    fcc: { top1:'#D97706', top23:'#F59E0B', normal:'#FCD34D', other:'#CBD5E1' },
-    line1:'#2563EB', line2:'#D97706',
-    yes:'#059669', no:'#DC2626', purple:'#8B5CF6',
-    axis:'#E4EAF2', axisLabel:'#94A3B8', split:'rgba(30,41,59,.08)', legend:'#475569',
-    tooltipBg:'#FFFFFF', tooltipBorder:'#E4EAF2', tooltipText:'#1E293B',
+    fin: { top1:'#0969DA', top23:'#218BFF', normal:'#9DC3F0', other:'#AFB8C1' },
+    fcc: { top1:'#9A6700', top23:'#BF8700', normal:'#E5C77A', other:'#AFB8C1' },
+    line1:'#0969DA', line2:'#9A6700',
+    yes:'#1A7F37', no:'#CF222E', purple:'#8250DF',
+    axis:'#DDE3EA', axisLabel:'#8C959F', split:'rgba(31,35,40,.07)', legend:'#59636E',
+    tooltipBg:'#FFFFFF', tooltipBorder:'#DDE3EA', tooltipText:'#1F2328',
     pieBorder:'#FFFFFF', onAccent:'#FFFFFF',
-    wordPalette:['#2563EB','#3B82F6','#059669','#8B5CF6','#D97706','#0891B2','#60A5FA','#0D9488'],
-    fccWordPalette:['#D97706','#B45309','#F59E0B','#92400E','#EA8C00','#A16207'],
-    wordCat:['#2563EB','#8B5CF6','#059669','#D97706','#DC2626','#0891B2'],
-    mapRange:['#E4EAF2','#BFDBFE','#60A5FA','#2563EB'],
-    mapRangeFcc:['#E4EAF2','#FDE68A','#F59E0B','#D97706'],
-    mapArea:'#E4EAF2', mapBorder:'#DCE4F0',
+    wordPalette:['#0969DA','#218BFF','#1A7F37','#8250DF','#9A6700','#0A7B83','#54AEFF','#116329'],
+    fccWordPalette:['#9A6700','#7D4E00','#BF8700','#654100','#A87C2B','#8C641A'],
+    wordCat:['#0969DA','#8250DF','#1A7F37','#9A6700','#CF222E','#0A7B83'],
+    mapRange:['#F1F4F8','#BFDBFE','#54AEFF','#0969DA'],
+    mapRangeFcc:['#F1F4F8','#F2E2B8','#BF8700','#9A6700'],
+    mapArea:'#E8EDF3', mapBorder:'#DDE3EA',
   },
 };
 // ======= 词云语义分类：稳定配色 + 图例（slot 对应 THEMES.wordCat） =======
@@ -3092,7 +3103,7 @@ const ICONS = {
 // ======= App =======
 const app = createApp({
   setup() {
-    // ========= 主题切换（暗夜霓虹 ⇄ 玻璃拟态白） =========
+    // ========= 主题切换（蓝玻璃 ⇄ 玻璃拟态白） =========
     const theme = ref(localStorage.getItem('theme') === 'light' ? 'light' : 'dark');
     const applyTheme = () => { document.documentElement.dataset.theme = theme.value; };
     applyTheme();

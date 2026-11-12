@@ -2815,7 +2815,10 @@
                   ></el-pagination>
                 </div>
               </div>
-              <el-empty v-else description="选择数据源并输入条件，点击查询"></el-empty>
+              <el-empty v-else
+                :description="qDetail.loading
+                  ? '正在检索 1349 万条原文，首次约 10–15 秒；同一条件 60 秒内会走缓存秒回'
+                  : '选择数据源并输入条件，点击查询'"></el-empty>
             </el-tab-pane>
           </el-tabs>
         </div>
@@ -2845,14 +2848,16 @@
   </el-drawer>
 </div>
 
-<!-- 图表库（随 body 末尾加载，不阻塞首屏 HTML/骨架渲染） -->
-<script src="/vendor/echarts.min.js"></script>
-<script src="/vendor/echarts-wordcloud.min.js"></script>
-<!-- Vue 3 + Element Plus -->
-<script src="/vendor/vue.global.prod.js"></script>
-<script src="/vendor/element-plus.min.js"></script>
+<!-- 图表库（defer 让浏览器并行下载，不阻塞 HTML 解析；执行顺序保持 echarts → wordcloud 不变） -->
+<script defer src="/vendor/echarts.min.js"></script>
+<script defer src="/vendor/echarts-wordcloud.min.js"></script>
+<!-- Vue 3 + Element Plus（同 defer，浏览器会并行拉取，DOM 就绪后按顺序执行） -->
+<script defer src="/vendor/vue.global.prod.js"></script>
+<script defer src="/vendor/element-plus.min.js"></script>
 
 <script>
+// 等 defer 的 vendor 脚本都执行完 + DOM 就绪后再启动（defer 脚本在 DOMContentLoaded 前按序执行）
+document.addEventListener('DOMContentLoaded', () => {
 const { createApp, ref, reactive, computed, onMounted, nextTick, watch } = Vue;
 // 同源部署（uvicorn/Docker）自动走当前域名；本地 5173 静态服务仍指向 8000 后端
 const API = window.__API_BASE__ ||
@@ -6430,6 +6435,14 @@ const app = createApp({
 
     async function doDetailSearch() {
       qDetail.loading = true;
+      // 原文库是全量扫描，耗时较长，用常驻提示代替"看起来没反应"
+      let _slowMsg = null;
+      if (qDetail.source === 'cfpb_text' && qDetail.keyword) {
+        _slowMsg = ElementPlus.ElMessage({
+          message: '正在检索原文库（1349 万条），首次约 10–15 秒…',
+          type: 'info', duration: 0, showClose: false,
+        });
+      }
       const p = new URLSearchParams({ source: qDetail.source });
       if (qDetail.keyword)  p.set('keyword', qDetail.keyword);
       if (qDetail.state)    p.set('state', qDetail.state);
@@ -6442,8 +6455,12 @@ const app = createApp({
       p.set('page', qDetail.page); p.set('page_size', qDetail.page_size);
       try {
         qDetail.result = await apiGet('/api/detail/search?' + p.toString());
-      } catch(e) { ElementPlus.ElMessage.error('查询失败，CSV 可能首次加载较慢，请重试'); }
-      finally { qDetail.loading = false; }
+      } catch(e) {
+        ElementPlus.ElMessage.error('查询失败：' + (e.message || '网络连接中断，请确认后端已启动'));
+      } finally {
+        qDetail.loading = false;
+        if (_slowMsg) _slowMsg.close();
+      }
     }
     function resetDetailQ() {
       qDetail.keyword=''; qDetail.state=''; qDetail.category='';
@@ -7870,6 +7887,7 @@ app.directive('countup', {
 });
 app.use(ElementPlus);
 app.mount('#app');
+}); // DOMContentLoaded 结束
 </script>
 </body>
 </html>

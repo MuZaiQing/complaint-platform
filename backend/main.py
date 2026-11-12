@@ -40,6 +40,18 @@ app.add_middleware(
 # 本地 vendor 开源库（three-globe / d3-force-3d，MIT/ISC，见 LICENSE-*.txt）
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 
+# ====================== 长缓存静态资源 ======================
+# vendor / fonts 版本固定永不变化，给 365 天 immutable 缓存，避免每次刷新重下 7MB+
+from starlette.middleware.base import BaseHTTPMiddleware
+class _ImmutCache(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        resp = await call_next(request)
+        p = request.url.path
+        if p.startswith('/vendor/') or p.startswith('/fonts/'):
+            resp.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        return resp
+app.add_middleware(_ImmutCache)
+
 # ====================== 前端静态资源（单进程一键部署） ======================
 app.mount("/fonts", StaticFiles(directory=os.path.join(BASE_DIR, "fonts")), name="fonts")
 app.mount("/vendor", StaticFiles(directory=os.path.join(BASE_DIR, "vendor")), name="vendor")
@@ -51,12 +63,14 @@ app.include_router(cluster_router)
 
 @app.get("/", include_in_schema=False)
 def serve_index():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(os.path.join(BASE_DIR, "index.html"),
+                        headers={"Cache-Control": "no-store, max-age=0"})
 
 
 @app.get("/index.html", include_in_schema=False)
 def serve_index_file():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(os.path.join(BASE_DIR, "index.html"),
+                        headers={"Cache-Control": "no-store, max-age=0"})
 
 
 @app.get("/usa_states.json", include_in_schema=False)
@@ -130,37 +144,47 @@ def read_table(name, limit=0):
 
 # ====================== 页面1 · 综合驾驶舱 ======================
 
+# overview 完整聚合缓存：首屏首次约 540ms，同会话内秒回
+_OVERVIEW_CACHE = None
+_OVERVIEW_TTL = 30
+
 @app.get("/api/dashboard/overview")
 def dashboard_overview():
+    global _OVERVIEW_CACHE
+    now = time.time()
+    if _OVERVIEW_CACHE and now - _OVERVIEW_CACHE[0] < _OVERVIEW_TTL:
+        return _OVERVIEW_CACHE[1]
+
     """顶部指标卡 6 个数字 + 双业务月度趋势 + TOP5 排行"""
-    # 指标卡
-    fin_total     = sum(r["complaint_count"] for r in read_table("fin_monthly"))
-    fcc_total     = sum(r["complaint_count"] for r in read_table("fcc_monthly"))
-    word_total    = read_table("fin_word_freq", limit=1)[0]["freq"]  # 用最高词频估一个量级，实际应来自 CCDB
+    # 一次性读入，避免重复调用 read_table 造成的多次 limit 参数构造 + Python dict 转换
+    fin_monthly  = read_table("fin_monthly")
+    fcc_monthly  = read_table("fcc_monthly")
+    fin_state    = read_table("fin_state")
+    fin_company  = read_table("fin_company")
+    fin_wordfreq = read_table("fin_word_freq", limit=0)
+
+    fin_total     = sum(r["complaint_count"] for r in fin_monthly)
+    fcc_total     = sum(r["complaint_count"] for r in fcc_monthly)
+    word_total    = fin_wordfreq[0]["freq"] if fin_wordfreq else 0
     timely_rows   = dict((r["response_flag"], r["complaint_count"]) for r in read_table("fin_timely_response"))
     yes = timely_rows.get("Yes", 0); no = timely_rows.get("No", 0)
     timely_rate   = round(yes / (yes + no) * 100, 2) if (yes + no) else 0
-    fin_states    = len(set(r["state_code"] for r in read_table("fin_state")))
+    fin_states    = len(set(r["state_code"] for r in fin_state))
     fcc_issues    = len(read_table("fcc_issue"))
-    fin_companies = len(read_table("fin_company"))
+    fin_companies = len(fin_company)
 
-    # 双业务月度趋势（只取最近 36 个月，重叠部分）
-    fin_monthly = read_table("fin_monthly")
-    fcc_monthly = read_table("fcc_monthly")
-    # 合并为统一 month 轴
     months = sorted(set(r["stat_month"] for r in fin_monthly + fcc_monthly))
     fm = {r["stat_month"]: r["complaint_count"] for r in fin_monthly}
     fc = {r["stat_month"]: r["complaint_count"] for r in fcc_monthly}
     trend = [{"month": m, "fin": fm.get(m, 0), "fcc": fc.get(m, 0)} for m in months[-48:]]
 
-    # TOP5 排行
-    top5_company = read_table("fin_company", limit=5)
+    top5_company = fin_company[:5]
     top5_fcc_issue = read_table("fcc_issue", limit=5)
-    top5_word = clean_wordfreq(read_table("fin_word_freq", limit=0), 10)
+    top5_word = clean_wordfreq(fin_wordfreq, 10)
     top5_product = read_table("fin_product", limit=5)
-    top5_state = read_table("fin_state", limit=5)
+    top5_state = fin_state[:5]
 
-    return {
+    result = {
         "cards": {
             "fin_total": fin_total,
             "fcc_total": fcc_total,
@@ -175,8 +199,10 @@ def dashboard_overview():
         "top5_word": top5_word,
         "top5_product": top5_product,
         "top5_state": top5_state,
-        "state": read_table("fin_state"),   # 全量州级数据（首页州热力地图用）
+        "state": fin_state,
     }
+    _OVERVIEW_CACHE = (now, result)
+    return result
 
 
 # ---- 3D 地球：州 × 月时序 + 州下钻（scripts/build_geo_detail.py 的离线预聚合产物） ----
@@ -767,7 +793,8 @@ def _col_contains(s, pat):
         pl = pat.lower()
         hits = [c for c in s.cat.categories if not pd.isna(c) and pl in str(c).lower()]
         return s.isin(hits)
-    return s.astype(str).str.contains(pat, case=False, na=False)
+    # regex=False 走纯子串匹配，比默认正则引擎快一个量级
+    return s.astype(str).str.contains(pat, case=False, na=False, regex=False)
 
 
 def _col_eq_upper(s, val):
@@ -840,6 +867,11 @@ def list_datasets():
     }
 
 
+_DETAIL_CACHE = {}       # 明细检索结果短缓存：同一组条件 60s 内秒回
+_DETAIL_TTL = 60
+_DETAIL_CACHE_MAX = 64
+
+
 @app.get("/api/detail/search")
 def search_detail(
     source: str = Query(...), keyword: str = Query(""), state: str = Query(""),
@@ -849,6 +881,13 @@ def search_detail(
 ):
     if source not in ("cfpb", "cfpb_text", "fcc"):
         raise HTTPException(400, "source 必须是 cfpb / cfpb_text / fcc")
+
+    ck = (source, keyword, state, category, date_from, date_to, key_id, timely, page, page_size)
+    now = time.time()
+    hit = _DETAIL_CACHE.get(ck)
+    if hit and now - hit[0] < _DETAIL_TTL:
+        return hit[1]
+
     info = dataset_meta(source)
     df = _filter_df(ensure_dataset(source), info, keyword, state, category,
                     date_from, date_to, key_id, timely)
@@ -862,12 +901,16 @@ def search_detail(
         for k, v in r.items():
             if isinstance(v, str) and len(v) > 2000:
                 r[k] = v[:2000] + "…[截断]"
-    return {
+    payload = {
         "source": source, "label": info["label"],
         "total": total, "page": page, "page_size": page_size,
         "pages": (total + page_size - 1) // page_size if total else 0,
         "columns": list(page_df.columns), "data": records,
     }
+    if len(_DETAIL_CACHE) >= _DETAIL_CACHE_MAX:
+        _DETAIL_CACHE.clear()
+    _DETAIL_CACHE[ck] = (now, payload)
+    return payload
 
 
 @app.get("/api/detail/export")
